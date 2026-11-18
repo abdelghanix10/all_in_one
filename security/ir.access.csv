@@ -1,0 +1,9 @@
+id,name,model_id,group_id/id,operation,domain
+access_aio_settings_user,all_in_one.settings.user,all_in_one.settings,all_in_one.group_all_in_one_user,crud,
+access_aio_production_user,all_in_one.production.entry.user,all_in_one.production.entry,all_in_one.group_all_in_one_user,crud,
+access_aio_expense_user,all_in_one.expense.user,all_in_one.expense,all_in_one.group_all_in_one_user,crud,
+access_aio_loss_user,all_in_one.loss.user,all_in_one.loss,all_in_one.group_all_in_one_user,crud,
+access_aio_purchase_user,all_in_one.purchase.entry.user,all_in_one.purchase.entry,all_in_one.group_all_in_one_user,crud,
+access_aio_reconcile_user,all_in_one.pastry.reconcile.user,all_in_one.pastry.reconcile,all_in_one.group_all_in_one_user,crud,
+access_aio_reconcile_line_user,all_in_one.pastry.reconcile.line.user,all_in_one.pastry.reconcile.line,all_in_one.group_all_in_one_user,crud,
+access_aio_dashboard_user,all_in_one.dashboard.user,all_in_one.dashboard,all_in_one.group_all_in_one_user,r,

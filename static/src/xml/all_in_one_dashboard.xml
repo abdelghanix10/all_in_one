@@ -23,24 +23,34 @@
 
                     <div class="d-flex align-items-center gap-1">
                         <small class="fw-bold">من:</small>
-                        <input type="date" class="form-control form-control-sm" t-model="this.state.filters.startDate" t-on-change="() => this.onCustomDateChange()"/>
+                        <input type="date" class="form-control form-control-sm"
+                               t-att-value="this.state.filters.startDate"
+                               t-on-change="(ev) => this.onStartDateChange(ev)"/>
                         <small class="fw-bold">إلى:</small>
-                        <input type="date" class="form-control form-control-sm" t-model="this.state.filters.endDate" t-on-change="() => this.onCustomDateChange()"/>
+                        <input type="date" class="form-control form-control-sm"
+                               t-att-value="this.state.filters.endDate"
+                               t-on-change="(ev) => this.onEndDateChange(ev)"/>
                     </div>
 
                     <!-- POS Register Filter -->
-                    <select class="form-select form-select-sm" style="width: auto;" t-model="this.state.filters.posConfigId" t-on-change="() => this.onFilterChange()">
-                        <option value="">كل نقاط البيع (All POS)</option>
+                    <select class="form-select form-select-sm" style="width: auto;"
+                            t-on-change="(ev) => this.onPosConfigFilterChange(ev)">
+                        <option value="" t-att-selected="!this.state.filters.posConfigId">كل نقاط البيع (All POS)</option>
                         <t t-foreach="this.state.data.pos_configs" t-as="cfg" t-key="cfg.id">
-                            <option t-att-value="cfg.id"><t t-out="cfg.name"/></option>
+                            <option t-att-value="cfg.id" t-att-selected="this.state.filters.posConfigId == cfg.id">
+                                <t t-out="cfg.name"/>
+                            </option>
                         </t>
                     </select>
 
                     <!-- POS Category Filter -->
-                    <select class="form-select form-select-sm" style="width: auto;" t-model="this.state.filters.posCategId" t-on-change="() => this.onFilterChange()">
-                        <option value="">كل التصنيفات (All Categories)</option>
+                    <select class="form-select form-select-sm" style="width: auto;"
+                            t-on-change="(ev) => this.onPosCategFilterChange(ev)">
+                        <option value="" t-att-selected="!this.state.filters.posCategId">كل التصنيفات (All Categories)</option>
                         <t t-foreach="this.state.data.pos_categories" t-as="cat" t-key="cat.id">
-                            <option t-att-value="cat.id"><t t-out="cat.name"/></option>
+                            <option t-att-value="cat.id" t-att-selected="this.state.filters.posCategId == cat.id">
+                                <t t-out="cat.name"/>
+                            </option>
                         </t>
                     </select>
 
@@ -133,8 +143,8 @@
                                     <div class="d-flex align-items-center gap-2">
                                         <span class="fw-bold">إدخال الإنتاج اليومي لتاريخ:</span>
                                         <input type="date" class="form-control form-control-sm" style="width: auto;"
-                                               t-model="this.state.filters.productionDate"
-                                               t-on-change="() => this.loadData()"/>
+                                               t-att-value="this.state.filters.productionDate"
+                                               t-on-change="(ev) => this.onProductionDateChange(ev)"/>
                                     </div>
                                     <button class="btn btn-primary btn-sm" t-on-click="() => this.saveProduction()">
                                         حفظ كميات الإنتاج
@@ -159,8 +169,10 @@
                                                         <td t-out="this.formatDH(p.list_price)"/>
                                                         <td t-out="p.qty_available"/>
                                                         <td>
-                                                            <input type="number" step="1" min="0" class="form-control form-control-sm fw-bold"
-                                                                   t-model="p.today_qty"/>
+                                                            <input type="number" step="1" min="0"
+                                                                   class="form-control form-control-sm fw-bold"
+                                                                   t-att-value="p.today_qty"
+                                                                   t-on-input="(ev) => this.updateField(p, 'today_qty', ev, true)"/>
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -185,10 +197,13 @@
                                         تُحفظ المنتجات هنا بشكل دائم، ويمكنك إطفاء أو إعادة تفعيل تتبع المخزون (<code>is_storable</code>) لها جميعاً بضغطة واحدة دون إزالتها من البطاقة.
                                     </p>
                                     <div class="d-flex gap-2 mb-3">
-                                        <select class="form-select form-select-sm" t-model="this.state.selectedCandidateId">
-                                            <option value="">اختر منتجاً متتبعاً لإضافته...</option>
+                                        <select class="form-select form-select-sm"
+                                                t-on-change="(ev) => this.updateField(this.state, 'selectedCandidateId', ev)">
+                                            <option value="" t-att-selected="!this.state.selectedCandidateId">اختر منتجاً متتبعاً لإضافته...</option>
                                             <t t-foreach="this.state.data.tracked_card.candidates" t-as="c" t-key="c.id">
-                                                <option t-att-value="c.id"><t t-out="c.name"/></option>
+                                                <option t-att-value="c.id" t-att-selected="this.state.selectedCandidateId == c.id">
+                                                    <t t-out="c.name"/>
+                                                </option>
                                             </t>
                                         </select>
                                         <button class="btn btn-sm btn-success" t-on-click="() => this.addTrackedProduct()">إضافة</button>
@@ -231,40 +246,47 @@
                             <div class="row g-2 align-items-end mb-3 p-2 bg-light rounded border">
                                 <div class="col-md-3">
                                     <label class="small fw-bold">البيان</label>
-                                    <input type="text" class="form-control form-control-sm" placeholder="مثال: فاتورة الكهرباء" t-model="this.state.newExpense.name"/>
+                                    <input type="text" class="form-control form-control-sm" placeholder="مثال: فاتورة الكهرباء"
+                                           t-att-value="this.state.newExpense.name"
+                                           t-on-input="(ev) => this.updateField(this.state.newExpense, 'name', ev)"/>
                                 </div>
                                 <div class="col-md-2">
                                     <label class="small fw-bold">النوع</label>
-                                    <select class="form-select form-select-sm" t-model="this.state.newExpense.expense_type">
-                                        <option value="internet">إنترنت</option>
-                                        <option value="electricity">كهرباء</option>
-                                        <option value="water">ماء</option>
-                                        <option value="salaries">رواتب العمال</option>
-                                        <option value="monthly_tax">ضريبة شهرية</option>
-                                        <option value="annual_tax">ضريبة سنوية</option>
-                                        <option value="fuel">وقود</option>
-                                        <option value="other">مصاريف أخرى</option>
+                                    <select class="form-select form-select-sm"
+                                            t-on-change="(ev) => this.updateField(this.state.newExpense, 'expense_type', ev)">
+                                        <option value="internet" t-att-selected="this.state.newExpense.expense_type === 'internet'">إنترنت</option>
+                                        <option value="electricity" t-att-selected="this.state.newExpense.expense_type === 'electricity'">كهرباء</option>
+                                        <option value="water" t-att-selected="this.state.newExpense.expense_type === 'water'">ماء</option>
+                                        <option value="salaries" t-att-selected="this.state.newExpense.expense_type === 'salaries'">رواتب العمال</option>
+                                        <option value="monthly_tax" t-att-selected="this.state.newExpense.expense_type === 'monthly_tax'">ضريبة شهرية</option>
+                                        <option value="annual_tax" t-att-selected="this.state.newExpense.expense_type === 'annual_tax'">ضريبة سنوية</option>
+                                        <option value="fuel" t-att-selected="this.state.newExpense.expense_type === 'fuel'">وقود</option>
+                                        <option value="other" t-att-selected="this.state.newExpense.expense_type === 'other'">مصاريف أخرى</option>
                                     </select>
                                 </div>
                                 <div class="col-md-2">
                                     <label class="small fw-bold">القسم</label>
-                                    <select class="form-select form-select-sm" t-model="this.state.newExpense.department">
-                                        <option value="pastry">باتيسري</option>
-                                        <option value="coffee">قهوة</option>
-                                        <option value="shared">مشترك</option>
+                                    <select class="form-select form-select-sm"
+                                            t-on-change="(ev) => this.updateField(this.state.newExpense, 'department', ev)">
+                                        <option value="pastry" t-att-selected="this.state.newExpense.department === 'pastry'">باتيسري</option>
+                                        <option value="coffee" t-att-selected="this.state.newExpense.department === 'coffee'">قهوة</option>
+                                        <option value="shared" t-att-selected="this.state.newExpense.department === 'shared'">مشترك</option>
                                     </select>
                                 </div>
                                 <div class="col-md-2">
                                     <label class="small fw-bold">الدورية</label>
-                                    <select class="form-select form-select-sm" t-model="this.state.newExpense.periodicity">
-                                        <option value="daily">يومي</option>
-                                        <option value="monthly">شهري (÷ 30)</option>
-                                        <option value="annual">سنوي (÷ 365)</option>
+                                    <select class="form-select form-select-sm"
+                                            t-on-change="(ev) => this.updateField(this.state.newExpense, 'periodicity', ev)">
+                                        <option value="daily" t-att-selected="this.state.newExpense.periodicity === 'daily'">يومي</option>
+                                        <option value="monthly" t-att-selected="this.state.newExpense.periodicity === 'monthly'">شهري (÷ 30)</option>
+                                        <option value="annual" t-att-selected="this.state.newExpense.periodicity === 'annual'">سنوي (÷ 365)</option>
                                     </select>
                                 </div>
                                 <div class="col-md-2">
                                     <label class="small fw-bold">المبلغ (DH)</label>
-                                    <input type="number" step="0.01" class="form-control form-control-sm" t-model="this.state.newExpense.amount"/>
+                                    <input type="number" step="0.01" class="form-control form-control-sm"
+                                           t-att-value="this.state.newExpense.amount"
+                                           t-on-input="(ev) => this.updateField(this.state.newExpense, 'amount', ev, true)"/>
                                 </div>
                                 <div class="col-md-1">
                                     <button class="btn btn-sm btn-primary w-100" t-on-click="() => this.addExpense()">إضافة</button>
@@ -316,39 +338,50 @@
                                 <div class="row g-2 align-items-end mb-3 p-2 bg-light rounded border">
                                     <div class="col-md-2">
                                         <label class="small fw-bold">التاريخ</label>
-                                        <input type="date" class="form-control form-control-sm" t-model="this.state.newLoss.date"/>
+                                        <input type="date" class="form-control form-control-sm"
+                                               t-att-value="this.state.newLoss.date"
+                                               t-on-change="(ev) => this.updateField(this.state.newLoss, 'date', ev)"/>
                                     </div>
                                     <div class="col-md-2">
                                         <label class="small fw-bold">نوع الخسارة</label>
-                                        <select class="form-select form-select-sm" t-model="this.state.newLoss.loss_type">
-                                            <option value="staff_meals">وجبات وفطور العمال</option>
-                                            <option value="damaged">مواد تالفة</option>
-                                            <option value="expired">منتهية الصلاحية نهاية اليوم</option>
+                                        <select class="form-select form-select-sm"
+                                                t-on-change="(ev) => this.updateField(this.state.newLoss, 'loss_type', ev)">
+                                            <option value="staff_meals" t-att-selected="this.state.newLoss.loss_type === 'staff_meals'">وجبات وفطور العمال</option>
+                                            <option value="damaged" t-att-selected="this.state.newLoss.loss_type === 'damaged'">مواد تالفة</option>
+                                            <option value="expired" t-att-selected="this.state.newLoss.loss_type === 'expired'">منتهية الصلاحية نهاية اليوم</option>
                                         </select>
                                     </div>
                                     <div class="col-md-2">
                                         <label class="small fw-bold">القسم</label>
-                                        <select class="form-select form-select-sm" t-model="this.state.newLoss.department">
-                                            <option value="pastry">باتيسري</option>
-                                            <option value="coffee">قهوة</option>
+                                        <select class="form-select form-select-sm"
+                                                t-on-change="(ev) => this.updateField(this.state.newLoss, 'department', ev)">
+                                            <option value="pastry" t-att-selected="this.state.newLoss.department === 'pastry'">باتيسري</option>
+                                            <option value="coffee" t-att-selected="this.state.newLoss.department === 'coffee'">قهوة</option>
                                         </select>
                                     </div>
                                     <div class="col-md-2">
                                         <label class="small fw-bold">المنتج</label>
-                                        <select class="form-select form-select-sm" t-model="this.state.newLoss.product_id">
-                                            <option value="">-- أو اكتب ملاحظة --</option>
+                                        <select class="form-select form-select-sm"
+                                                t-on-change="(ev) => this.updateField(this.state.newLoss, 'product_id', ev)">
+                                            <option value="" t-att-selected="!this.state.newLoss.product_id">-- اختر منتجاً --</option>
                                             <t t-foreach="this.state.data.all_pos_products" t-as="p" t-key="p.id">
-                                                <option t-att-value="p.id"><t t-out="p.display_name"/></option>
+                                                <option t-att-value="p.id" t-att-selected="this.state.newLoss.product_id == p.id">
+                                                    <t t-out="p.display_name"/>
+                                                </option>
                                             </t>
                                         </select>
                                     </div>
                                     <div class="col-md-1">
                                         <label class="small fw-bold">الكمية</label>
-                                        <input type="number" step="0.1" class="form-control form-control-sm" t-model="this.state.newLoss.quantity"/>
+                                        <input type="number" step="0.1" class="form-control form-control-sm"
+                                               t-att-value="this.state.newLoss.quantity"
+                                               t-on-input="(ev) => this.updateField(this.state.newLoss, 'quantity', ev, true)"/>
                                     </div>
                                     <div class="col-md-2">
                                         <label class="small fw-bold">قيمة الوحدة (DH)</label>
-                                        <input type="number" step="0.1" class="form-control form-control-sm" t-model="this.state.newLoss.unit_value"/>
+                                        <input type="number" step="0.1" class="form-control form-control-sm"
+                                               t-att-value="this.state.newLoss.unit_value"
+                                               t-on-input="(ev) => this.updateField(this.state.newLoss, 'unit_value', ev, true)"/>
                                     </div>
                                     <div class="col-md-1">
                                         <button class="btn btn-sm btn-danger w-100" t-on-click="() => this.addLoss()">تسجيل</button>
@@ -420,14 +453,17 @@
                             <div class="row g-2 align-items-end mb-3 p-2 bg-light rounded border">
                                 <div class="col-md-2">
                                     <label class="small fw-bold">التاريخ</label>
-                                    <input type="date" class="form-control form-control-sm" t-model="this.state.newPurchase.date"/>
+                                    <input type="date" class="form-control form-control-sm"
+                                           t-att-value="this.state.newPurchase.date"
+                                           t-on-change="(ev) => this.updateField(this.state.newPurchase, 'date', ev)"/>
                                 </div>
                                 <div class="col-md-3">
                                     <label class="small fw-bold">السلعة (Can be Purchased)</label>
-                                    <select class="form-select form-select-sm" t-model="this.state.newPurchase.raw_product_id">
-                                        <option value="">اختر السلعة...</option>
+                                    <select class="form-select form-select-sm"
+                                            t-on-change="(ev) => this.updateField(this.state.newPurchase, 'raw_product_id', ev)">
+                                        <option value="" t-att-selected="!this.state.newPurchase.raw_product_id">اختر السلعة...</option>
                                         <t t-foreach="this.state.data.raw_materials_catalog" t-as="rm" t-key="rm.id">
-                                            <option t-att-value="rm.id">
+                                            <option t-att-value="rm.id" t-att-selected="this.state.newPurchase.raw_product_id == rm.id">
                                                 [<t t-out="rm.categ_name"/>] <t t-out="rm.name"/> ➔ (<t t-out="rm.final_product_name"/>)
                                             </option>
                                         </t>
@@ -435,18 +471,23 @@
                                 </div>
                                 <div class="col-md-2">
                                     <label class="small fw-bold">القسم</label>
-                                    <select class="form-select form-select-sm" t-model="this.state.newPurchase.department">
-                                        <option value="pastry">باتيسري</option>
-                                        <option value="coffee">قهوة</option>
+                                    <select class="form-select form-select-sm"
+                                            t-on-change="(ev) => this.updateField(this.state.newPurchase, 'department', ev)">
+                                        <option value="pastry" t-att-selected="this.state.newPurchase.department === 'pastry'">باتيسري</option>
+                                        <option value="coffee" t-att-selected="this.state.newPurchase.department === 'coffee'">قهوة</option>
                                     </select>
                                 </div>
                                 <div class="col-md-2">
                                     <label class="small fw-bold">الكمية</label>
-                                    <input type="number" step="0.1" class="form-control form-control-sm" t-model="this.state.newPurchase.quantity"/>
+                                    <input type="number" step="0.1" class="form-control form-control-sm"
+                                           t-att-value="this.state.newPurchase.quantity"
+                                           t-on-input="(ev) => this.updateField(this.state.newPurchase, 'quantity', ev, true)"/>
                                 </div>
                                 <div class="col-md-2">
                                     <label class="small fw-bold">تكلفة الوحدة (DH)</label>
-                                    <input type="number" step="0.01" class="form-control form-control-sm" t-model="this.state.newPurchase.unit_cost"/>
+                                    <input type="number" step="0.01" class="form-control form-control-sm"
+                                           t-att-value="this.state.newPurchase.unit_cost"
+                                           t-on-input="(ev) => this.updateField(this.state.newPurchase, 'unit_cost', ev, true)"/>
                                 </div>
                                 <div class="col-md-1">
                                     <button class="btn btn-sm btn-primary w-100" t-on-click="() => this.addPurchase()">حفظ</button>
@@ -578,7 +619,7 @@
                                                 </table>
                                             </td>
 
-                                            <!-- Column 3: Comparison & Difference -->
+                                            <!-- Column 3 -->
                                             <td class="text-center">
                                                 <div>المباع: <strong t-out="tier.sold_qty"/></div>
                                                 <div>الموزع: <strong class="text-primary" t-out="tier.allocated_total"/></div>
@@ -589,9 +630,8 @@
                                                 </div>
                                             </td>
 
-                                            <!-- Column 4: Actions (Approve, Edit, Reject) -->
+                                            <!-- Column 4 -->
                                             <td class="text-center">
-                                                <!-- When Approved and not in Edit mode: Hide Approve & Reject, show ONLY Edit -->
                                                 <t t-if="tier.state === 'approved' and !tier.editing">
                                                     <div class="mb-2">
                                                         <span class="badge bg-success">تمت الموافقة وخصم المخزون</span>
@@ -601,8 +641,6 @@
                                                         <i class="oi me-1" data-icon="edit"/>تعديل
                                                     </button>
                                                 </t>
-
-                                                <!-- When Draft, Rejected, or Editing: Show Approve, Edit, and Reject -->
                                                 <t t-else="">
                                                     <div class="d-flex flex-column gap-1">
                                                         <button class="btn btn-sm btn-success"
@@ -661,7 +699,6 @@
 
                     <!-- ================= TAB 8: ACCOUNTING & AI INSIGHTS ================= -->
                     <div t-if="this.state.activeTab === 'accounting_ai'" class="row g-4">
-                        <!-- Detailed Profit Equations & Breakdown -->
                         <div class="col-lg-6">
                             <div class="card shadow-sm h-100">
                                 <div class="card-header bg-white fw-bold">تفصيل معادلات حساب الأرباح الإجمالية والصافية</div>
@@ -685,7 +722,7 @@
                                     <div class="p-2 bg-light rounded border mb-3 dir-ltr text-start font-monospace">
                                         <t t-out="this.formatDH(this.state.data.kpis.coffee.sales)"/>
                                         - <t t-out="this.formatDH(this.state.data.kpis.coffee.expenses)"/>
-                                        - <t t-out="this.state.data.kpis.coffee.losses"/>
+                                        - <t t-out="this.formatDH(this.state.data.kpis.coffee.losses)"/>
                                         - <t t-out="this.formatDH(this.state.data.kpis.coffee.purchases)"/>
                                         = <strong class="text-success" t-out="this.formatDH(this.state.data.kpis.coffee.net_profit)"/>
                                     </div>
@@ -699,7 +736,6 @@
                             </div>
                         </div>
 
-                        <!-- AI Assistant (Gemini & OpenRouter) -->
                         <div class="col-lg-6">
                             <div class="card shadow-sm h-100">
                                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
@@ -720,7 +756,8 @@
 
                                     <textarea class="form-control" rows="3"
                                               placeholder="اكتب سؤالك للمساعد الذكي حول الأرقام الحالية..."
-                                              t-model="this.state.aiPrompt"/>
+                                              t-att-value="this.state.aiPrompt"
+                                              t-on-input="(ev) => this.updateField(this.state, 'aiPrompt', ev)"/>
 
                                     <button class="btn btn-primary" t-att-disabled="this.state.aiLoading" t-on-click="() => this.askAi()">
                                         <t t-if="this.state.aiLoading">جاري التحليل بواسطة الذكاء الاصطناعي...</t>
@@ -744,7 +781,6 @@
                         </div>
                         <div class="card-body">
                             <div class="row g-4">
-                                <!-- POS Categories Mapping -->
                                 <div class="col-md-4">
                                     <h6 class="fw-bold text-primary">1. تصنيفات قسم الباتيسري</h6>
                                     <div class="border rounded p-2 bg-light" style="max-height: 200px; overflow-y: auto;">
@@ -787,7 +823,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Shared Expenses Split % -->
                                 <div class="col-md-6">
                                     <h6 class="fw-bold">4. نسبة توزيع المصاريف المشتركة (%)</h6>
                                     <div class="row g-2">
@@ -805,34 +840,42 @@
                                     </div>
                                 </div>
 
-                                <!-- AI API Keys & Models -->
                                 <div class="col-md-6">
                                     <h6 class="fw-bold">5. إعدادات الذكاء الاصطناعي (Google Gemini &amp; OpenRouter)</h6>
                                     <div class="mb-2">
                                         <label class="small fw-bold">المزود النشط</label>
-                                        <select class="form-select form-select-sm" t-model="this.state.data.settings.ai_provider">
-                                            <option value="gemini">Google Gemini</option>
-                                            <option value="openrouter">OpenRouter</option>
+                                        <select class="form-select form-select-sm"
+                                                t-on-change="(ev) => this.updateField(this.state.data.settings, 'ai_provider', ev)">
+                                            <option value="gemini" t-att-selected="this.state.data.settings.ai_provider === 'gemini'">Google Gemini</option>
+                                            <option value="openrouter" t-att-selected="this.state.data.settings.ai_provider === 'openrouter'">OpenRouter</option>
                                         </select>
                                     </div>
                                     <div class="row g-2 mb-2">
                                         <div class="col-7">
                                             <label class="small">Gemini API Key</label>
-                                            <input type="password" class="form-control form-control-sm" t-model="this.state.data.settings.gemini_api_key"/>
+                                            <input type="password" class="form-control form-control-sm"
+                                                   t-att-value="this.state.data.settings.gemini_api_key"
+                                                   t-on-input="(ev) => this.updateField(this.state.data.settings, 'gemini_api_key', ev)"/>
                                         </div>
                                         <div class="col-5">
                                             <label class="small">Gemini Model</label>
-                                            <input type="text" class="form-control form-control-sm" t-model="this.state.data.settings.gemini_model"/>
+                                            <input type="text" class="form-control form-control-sm"
+                                                   t-att-value="this.state.data.settings.gemini_model"
+                                                   t-on-input="(ev) => this.updateField(this.state.data.settings, 'gemini_model', ev)"/>
                                         </div>
                                     </div>
                                     <div class="row g-2">
                                         <div class="col-7">
                                             <label class="small">OpenRouter API Key</label>
-                                            <input type="password" class="form-control form-control-sm" t-model="this.state.data.settings.openrouter_api_key"/>
+                                            <input type="password" class="form-control form-control-sm"
+                                                   t-att-value="this.state.data.settings.openrouter_api_key"
+                                                   t-on-input="(ev) => this.updateField(this.state.data.settings, 'openrouter_api_key', ev)"/>
                                         </div>
                                         <div class="col-5">
                                             <label class="small">OpenRouter Model</label>
-                                            <input type="text" class="form-control form-control-sm" t-model="this.state.data.settings.openrouter_model"/>
+                                            <input type="text" class="form-control form-control-sm"
+                                                   t-att-value="this.state.data.settings.openrouter_model"
+                                                   t-on-input="(ev) => this.updateField(this.state.data.settings, 'openrouter_model', ev)"/>
                                         </div>
                                     </div>
                                 </div>

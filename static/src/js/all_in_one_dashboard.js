@@ -13,7 +13,7 @@ export class AllInOneDashboard extends Component {
 
         const today = new Date().toISOString().split("T")[0];
 
-        // OWL 3 in Odoo 20 uses proxy() instead of useState()
+        // OWL 3 reactive state using proxy()
         this.state = proxy({
             activeTab: "analytics",
             loading: true,
@@ -65,7 +65,6 @@ export class AllInOneDashboard extends Component {
                 purchases: [],
                 reconciliation_tiers: [],
             },
-            // Forms state
             selectedCandidateId: "",
             newExpense: { name: "", date: today, expense_type: "electricity", department: "shared", periodicity: "monthly", amount: 0 },
             newLoss: { date: today, loss_type: "expired", department: "pastry", product_id: "", note: "", quantity: 1, unit_value: 0 },
@@ -78,6 +77,12 @@ export class AllInOneDashboard extends Component {
         onWillStart(async () => {
             await this.loadData();
         });
+    }
+
+    // Generic helper for updating nested state fields without t-model
+    updateField(targetObj, fieldName, ev, isNumber = false) {
+        const raw = ev.target.value;
+        targetObj[fieldName] = isNumber ? (parseFloat(raw) || 0) : raw;
     }
 
     async loadData() {
@@ -111,12 +116,30 @@ export class AllInOneDashboard extends Component {
         await this.loadData();
     }
 
-    async onCustomDateChange() {
+    async onStartDateChange(ev) {
+        this.state.filters.startDate = ev.target.value;
         this.state.filters.datePreset = "custom";
         await this.loadData();
     }
 
-    async onFilterChange() {
+    async onEndDateChange(ev) {
+        this.state.filters.endDate = ev.target.value;
+        this.state.filters.datePreset = "custom";
+        await this.loadData();
+    }
+
+    async onPosConfigFilterChange(ev) {
+        this.state.filters.posConfigId = ev.target.value;
+        await this.loadData();
+    }
+
+    async onPosCategFilterChange(ev) {
+        this.state.filters.posCategId = ev.target.value;
+        await this.loadData();
+    }
+
+    async onProductionDateChange(ev) {
+        this.state.filters.productionDate = ev.target.value;
         await this.loadData();
     }
 

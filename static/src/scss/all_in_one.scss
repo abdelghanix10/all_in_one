@@ -1,47 +1,213 @@
 .o_aio_dashboard {
-    direction: rtl;
-    text-align: right;
-    background-color: #f4f6f9;
+    height: 100%;
+    overflow: hidden !important;
+    background-color: #f8fafc;
+    color: #0f172a;
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
-    .aio-kpi-card {
+    .aio-topbar {
+        flex: 0 0 auto;
+        background: #ffffff;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .aio-nav-bar {
+        flex: 0 0 auto;
+        background: #ffffff;
+        border-bottom: 1px solid #e2e8f0;
+        overflow-x: auto;
+        overflow-y: hidden;
+        min-height: 48px;
+
+        .aio-tab-btn {
+            flex: 0 0 auto;
+            border: none;
+            background: transparent;
+            color: #64748b;
+            font-weight: 500;
+            font-size: 0.875rem;
+            padding: 0.45rem 0.85rem;
+            border-radius: 8px;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: background-color 0.15s ease, color 0.15s ease;
+
+            &:hover {
+                background: #f1f5f9;
+                color: #0f172a;
+            }
+
+            &.active {
+                background: #eef2ff;
+                color: #4f46e5;
+                font-weight: 600;
+            }
+        }
+    }
+
+    .aio-content {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+    }
+
+    .aio-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
         border-radius: 12px;
-        border: none;
-        border-right: 4px solid #0d6efd;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        transition: transform 0.15s ease;
-
-        &:hover {
-            transform: translateY(-2px);
-        }
-        &.kpi-green { border-right-color: #198754; }
-        &.kpi-orange { border-right-color: #fd7e14; }
-        &.kpi-red { border-right-color: #dc3545; }
-        &.kpi-purple { border-right-color: #6f42c1; }
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
     }
 
-    .nav-tabs .nav-link {
-        font-weight: 600;
-        color: #495057;
-        border-radius: 8px 8px 0 0;
+    .aio-kpi {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1rem 1.1rem;
 
-        &.active {
-            color: #0d6efd;
-            border-bottom: 3px solid #0d6efd;
-            background: #fff;
+        .aio-kpi-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 0.35rem;
+        }
+
+        .aio-kpi-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            line-height: 1.2;
         }
     }
 
-    .aio-price-badge {
-        font-size: 1.1rem;
-        padding: 6px 14px;
-        border-radius: 20px;
+    .aio-table {
+        margin-bottom: 0;
+        font-size: 0.875rem;
+
+        thead th {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #64748b;
+            font-weight: 600;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f8fafc;
+            padding: 0.65rem 0.75rem;
+        }
+
+        tbody td {
+            padding: 0.6rem 0.75rem;
+            vertical-align: middle;
+            border-color: #f1f5f9;
+        }
+
+        tbody tr:hover {
+            background-color: #f8fafc;
+        }
+    }
+
+    .aio-inline-form {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 0.85rem;
     }
 
     .aio-ai-response {
         white-space: pre-wrap;
-        line-height: 1.7;
+        line-height: 1.65;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-inline-start: 3px solid #4f46e5;
+        border-radius: 10px;
+        padding: 1rem;
+        font-size: 0.92rem;
+    }
+
+    /* ================= n8n-STYLE AUTOMATIONS CANVAS ================= */
+    .aio-wf-item {
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 0.65rem 0.8rem;
+        cursor: pointer;
         background: #ffffff;
-        border-right: 4px solid #6f42c1;
+        transition: border-color 0.15s ease, background-color 0.15s ease;
+
+        &:hover {
+            border-color: #cbd5e1;
+            background: #f8fafc;
+        }
+
+        &.selected {
+            border-color: #4f46e5;
+            background: #eef2ff;
+        }
+    }
+
+    .aio-status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        flex-shrink: 0;
+
+        &.dot-success { background: #10b981; }
+        &.dot-error { background: #ef4444; }
+        &.dot-never { background: #94a3b8; }
+    }
+
+    .aio-canvas {
+        background-color: #f8fafc;
+        background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+        background-size: 18px 18px;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1.5rem 1rem;
+        min-height: 360px;
+    }
+
+    .aio-node {
+        width: 100%;
+        max-width: 580px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);
+        overflow: hidden;
+
+        &.node-trigger {
+            border-top: 3px solid #4f46e5;
+        }
+
+        &.node-action {
+            border-top: 3px solid #10b981;
+        }
+    }
+
+    .aio-node-connector {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: #94a3b8;
+        height: 34px;
+        justify-content: center;
+
+        &::before {
+            content: "";
+            width: 2px;
+            height: 16px;
+            background: #cbd5e1;
+        }
+    }
+
+    .aio-run-output {
+        white-space: pre-wrap;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.8rem;
+        background: #0f172a;
+        color: #e2e8f0;
+        border-radius: 10px;
+        padding: 0.85rem 1rem;
     }
 }

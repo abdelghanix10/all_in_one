@@ -76,7 +76,7 @@ class AllInOneDashboard(models.TransientModel):
             'location_id': src_loc.id,
             'location_dest_id': dest_loc.id,
             'product_id': product.id,
-            'product_uom': product.uom_id.id,
+            'uom_id': product.uom_id.id,
             'product_uom_qty': abs_qty,
             'quantity': abs_qty,
             'picked': True,
@@ -498,6 +498,38 @@ class AllInOneDashboard(models.TransientModel):
             [('available_in_pos', '=', True)], ['id', 'display_name', 'lst_price']
         )
 
+        # -------------------------------------------------------------------------
+        # 8. AUTOMATIONS (n8n-style Workflows & Recent Logs)
+        # -------------------------------------------------------------------------
+        workflows = self.env['all_in_one.automation'].sudo().search([])
+        automations_list = []
+        for wf in workflows:
+            automations_list.append({
+                'id': wf.id,
+                'name': wf.name,
+                'active': wf.active,
+                'trigger_type': wf.trigger_type,
+                'schedule_time': wf.schedule_time or '23:00',
+                'schedule_weekday': wf.schedule_weekday or '6',
+                'interval_hours': wf.interval_hours or 24,
+                'steps': wf._get_steps(),
+                'last_run': wf.last_run.strftime('%Y-%m-%d %H:%M') if wf.last_run else '',
+                'last_status': wf.last_status or 'never',
+                'last_message': wf.last_message or '',
+                'run_count': wf.run_count or 0,
+            })
+
+        recent_logs = self.env['all_in_one.automation.log'].sudo().search([], limit=30)
+        automation_logs = [{
+            'id': lg.id,
+            'automation_id': lg.automation_id.id,
+            'automation_name': lg.automation_id.name,
+            'date': lg.create_date.strftime('%Y-%m-%d %H:%M'),
+            'trigger_source': lg.trigger_source,
+            'status': lg.status,
+            'details': lg.details or '',
+        } for lg in recent_logs]
+
         return {
             'filter_info': {
                 'start_date': start_date.strftime('%Y-%m-%d'),
@@ -562,6 +594,8 @@ class AllInOneDashboard(models.TransientModel):
             'raw_materials_catalog': raw_materials_catalog,
             'purchases': purchases_list,
             'reconciliation_tiers': reconciliation_tiers,
+            'automations': automations_list,
+            'automation_logs': automation_logs,
         }
 
     # =========================================================================
@@ -767,28 +801,84 @@ class AllInOneDashboard(models.TransientModel):
     # =========================================================================
     # 8. AI ASSISTANT (GOOGLE GEMINI & OPENROUTER)
     # =========================================================================
+    # =========================================================================
+    # AUTOMATION WORKFLOW RPC METHODS
+    # =========================================================================
     @api.model
-    def ask_ai_assistant(self, user_prompt, stats_context):
+    def save_automation_workflow(self, vals):
+        Auto = self.env['all_in_one.automation'].sudo()
+        wf_vals = {
+            'name': vals.get('name') or 'New Workflow',
+            'active': bool(vals.get('active', True)),
+            'trigger_type': vals.get('trigger_type', 'daily'),
+            'schedule_time': vals.get('schedule_time') or '23:00',
+            'schedule_weekday': str(vals.get('schedule_weekday', '6')),
+            'interval_hours': int(vals.get('interval_hours') or 24),
+            'steps_json': json.dumps(vals.get('steps') or [], ensure_ascii=False),
+        }
+        wf_id = vals.get('id')
+        if wf_id:
+            wf = Auto.browse(int(wf_id))
+            if wf.exists():
+                wf.write(wf_vals)
+                return wf.id
+        wf = Auto.create(wf_vals)
+        return wf.id
+
+    @api.model
+    def delete_automation_workflow(self, wf_id):
+        self.env['all_in_one.automation'].sudo().browse(int(wf_id)).unlink()
+        return True
+
+    @api.model
+    def toggle_automation_active(self, wf_id, is_active):
+        self.env['all_in_one.automation'].sudo().browse(int(wf_id)).write({'active': bool(is_active)})
+        return True
+
+    @api.model
+    def run_automation_now(self, wf_id):
+        wf = self.env['all_in_one.automation'].sudo().browse(int(wf_id))
+        if not wf.exists():
+            raise UserError(_("Workflow not found."))
+        return wf.execute_workflow(trigger_source='manual')
+
+    # =========================================================================
+    # AI ASSISTANT (GOOGLE GEMINI & OPENROUTER) — BILINGUAL
+    # =========================================================================
+    @api.model
+    def ask_ai_assistant(self, user_prompt, stats_context, lang='en'):
         settings = self.env['all_in_one.settings'].get_singleton()
         provider = settings.ai_provider or 'gemini'
 
-        system_instruction = (
-            "أنت مستشار مالي وتشغيلي خبير لمشروع باتيسري ومقهى (Bakery, Pastry & Coffee) في المغرب (العملة: درهم DH).\n"
-            "إليك البيانات المالية والتشغيلية الدقيقة للفترة المحددة حالياً في الفلتر:\n"
-            f"{json.dumps(stats_context, ensure_ascii=False, indent=2)}\n\n"
-            "قدم إجابات دقيقة، عملية، ومبنية على هذه الأرقام لتحسين صافي الربح وتقليل الخسائر والهدر."
-        )
+        if lang == 'ar':
+            system_instruction = (
+                "أنت مستشار مالي وتشغيلي خبير لمشروع باتيسري ومقهى (Bakery, Pastry & Coffee) في المغرب (العملة: درهم DH).\n"
+                "إليك البيانات المالية والتشغيلية الدقيقة للفترة المحددة حالياً في الفلتر:\n"
+                f"{json.dumps(stats_context, ensure_ascii=False, indent=2)}\n\n"
+                "قدم إجابات دقيقة، عملية، ومبنية على هذه الأرقام باللغة العربية لتحسين صافي الربح وتقليل الخسائر والهدر."
+            )
+            missing_key_gemini = "يرجى إدخال مفتاح Google Gemini API Key في تبويب الإعدادات أولاً."
+            missing_key_or = "يرجى إدخال مفتاح OpenRouter API Key في تبويب الإعدادات أولاً."
+        else:
+            system_instruction = (
+                "You are an expert financial and operations advisor for a Bakery, Pastry & Coffee business (currency: DH).\n"
+                "Here are the exact financial and operational metrics for the currently selected filter period:\n"
+                f"{json.dumps(stats_context, ensure_ascii=False, indent=2)}\n\n"
+                "Provide clear, concise, actionable recommendations in English based on these numbers to increase net profit and reduce waste."
+            )
+            missing_key_gemini = "Please enter your Google Gemini API Key in the Settings tab first."
+            missing_key_or = "Please enter your OpenRouter API Key in the Settings tab first."
 
         if provider == 'gemini':
             api_key = (settings.gemini_api_key or '').strip()
             model = (settings.gemini_model or 'gemini-2.5-flash').strip()
             if not api_key:
-                return _("يرجى إدخال مفتاح Google Gemini API Key في تبويب الإعدادات أولاً.")
+                return missing_key_gemini
 
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
             payload = {
                 "contents": [{
-                    "parts": [{"text": f"{system_instruction}\n\nسؤال المستخدم: {user_prompt}"}]
+                    "parts": [{"text": f"{system_instruction}\n\nQuestion: {user_prompt}"}]
                 }]
             }
             req = urllib.request.Request(
@@ -802,13 +892,13 @@ class AllInOneDashboard(models.TransientModel):
                     result = json.loads(resp.read().decode('utf-8'))
                     return result['candidates'][0]['content']['parts'][0]['text']
             except Exception as e:
-                return _("خطأ في الاتصال بـ Google Gemini API: %s", str(e))
+                return f"Google Gemini API Error: {e}"
 
         else:
             api_key = (settings.openrouter_api_key or '').strip()
             model = (settings.openrouter_model or 'google/gemini-2.5-flash').strip()
             if not api_key:
-                return _("يرجى إدخال مفتاح OpenRouter API Key في تبويب الإعدادات أولاً.")
+                return missing_key_or
 
             url = "https://openrouter.ai/api/v1/chat/completions"
             payload = {
@@ -832,4 +922,4 @@ class AllInOneDashboard(models.TransientModel):
                     result = json.loads(resp.read().decode('utf-8'))
                     return result['choices'][0]['message']['content']
             except Exception as e:
-                return _("خطأ في الاتصال بـ OpenRouter API: %s", str(e))
+                return f"OpenRouter API Error: {e}"

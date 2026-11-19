@@ -6,4 +6,6 @@ access_aio_loss_user,all_in_one.loss.user,all_in_one.loss,all_in_one.group_all_i
 access_aio_purchase_user,all_in_one.purchase.entry.user,all_in_one.purchase.entry,all_in_one.group_all_in_one_user,crud,
 access_aio_reconcile_user,all_in_one.pastry.reconcile.user,all_in_one.pastry.reconcile,all_in_one.group_all_in_one_user,crud,
 access_aio_reconcile_line_user,all_in_one.pastry.reconcile.line.user,all_in_one.pastry.reconcile.line,all_in_one.group_all_in_one_user,crud,
+access_aio_automation_user,all_in_one.automation.user,all_in_one.automation,all_in_one.group_all_in_one_user,crud,
+access_aio_automation_log_user,all_in_one.automation.log.user,all_in_one.automation.log,all_in_one.group_all_in_one_user,crud,
 access_aio_dashboard_user,all_in_one.dashboard.user,all_in_one.dashboard,all_in_one.group_all_in_one_user,r,

@@ -1,82 +1,104 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="all_in_one.Dashboard">
-        <div class="o_aio_dashboard h-100 d-flex flex-column overflow-auto">
+        <div class="o_aio_dashboard h-100 d-flex flex-column" t-att-dir="this.dir">
 
-            <!-- ================= GLOBAL FILTER BAR ================= -->
-            <div class="bg-white border-bottom p-3 d-flex flex-wrap justify-content-between align-items-center gap-3 shadow-sm">
+            <!-- ================= CLEAN TOP BAR ================= -->
+            <div class="aio-topbar px-3 py-2 d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <div class="d-flex align-items-center gap-2">
-                    <h4 class="m-0 fw-bold text-primary">All In One ERP</h4>
-                    <span class="badge bg-info text-dark">
-                        <t t-out="this.state.data.filter_info.num_days"/> يوم
+                    <span class="fw-bold fs-5 text-dark" t-out="this.t('app_title')"/>
+                    <span class="badge rounded-pill bg-secondary-subtle text-dark border">
+                        <t t-out="this.state.data.filter_info.num_days"/> <t t-out="this.t('days')"/>
                     </span>
+
+                    <!-- EN / AR Switcher -->
+                    <div class="btn-group btn-group-sm ms-2">
+                        <button type="button" class="btn btn-outline-secondary"
+                                t-att-class="{active: this.state.lang === 'en'}"
+                                t-on-click="() => this.setLang('en')">EN</button>
+                        <button type="button" class="btn btn-outline-secondary"
+                                t-att-class="{active: this.state.lang === 'ar'}"
+                                t-on-click="() => this.setLang('ar')">AR</button>
+                    </div>
                 </div>
 
-                <!-- Unified Filters: Date Presets, Custom Range, POS Register, POS Category -->
+                <!-- Compact Global Filters -->
                 <div class="d-flex flex-wrap align-items-center gap-2">
                     <div class="btn-group btn-group-sm">
-                        <button class="btn btn-outline-primary" t-att-class="{active: this.state.filters.datePreset === 'today'}" t-on-click="() => this.setDatePreset('today')">اليوم</button>
-                        <button class="btn btn-outline-primary" t-att-class="{active: this.state.filters.datePreset === 'yesterday'}" t-on-click="() => this.setDatePreset('yesterday')">البارحة</button>
-                        <button class="btn btn-outline-primary" t-att-class="{active: this.state.filters.datePreset === 'this_week'}" t-on-click="() => this.setDatePreset('this_week')">هذا الأسبوع</button>
-                        <button class="btn btn-outline-primary" t-att-class="{active: this.state.filters.datePreset === 'last_week'}" t-on-click="() => this.setDatePreset('last_week')">الأسبوع الماضي</button>
+                        <button type="button" class="btn btn-outline-secondary" t-att-class="{active: this.state.filters.datePreset === 'today'}" t-on-click="() => this.setDatePreset('today')" t-out="this.t('today')"/>
+                        <button type="button" class="btn btn-outline-secondary" t-att-class="{active: this.state.filters.datePreset === 'yesterday'}" t-on-click="() => this.setDatePreset('yesterday')" t-out="this.t('yesterday')"/>
+                        <button type="button" class="btn btn-outline-secondary" t-att-class="{active: this.state.filters.datePreset === 'this_week'}" t-on-click="() => this.setDatePreset('this_week')" t-out="this.t('this_week')"/>
+                        <button type="button" class="btn btn-outline-secondary" t-att-class="{active: this.state.filters.datePreset === 'last_week'}" t-on-click="() => this.setDatePreset('last_week')" t-out="this.t('last_week')"/>
                     </div>
 
                     <div class="d-flex align-items-center gap-1">
-                        <small class="fw-bold">من:</small>
                         <input type="date" class="form-control form-control-sm"
                                t-att-value="this.state.filters.startDate"
                                t-on-change="(ev) => this.onStartDateChange(ev)"/>
-                        <small class="fw-bold">إلى:</small>
+                        <span class="text-muted small">–</span>
                         <input type="date" class="form-control form-control-sm"
                                t-att-value="this.state.filters.endDate"
                                t-on-change="(ev) => this.onEndDateChange(ev)"/>
                     </div>
 
-                    <!-- POS Register Filter -->
                     <select class="form-select form-select-sm" style="width: auto;"
                             t-on-change="(ev) => this.onPosConfigFilterChange(ev)">
-                        <option value="" t-att-selected="!this.state.filters.posConfigId">كل نقاط البيع (All POS)</option>
+                        <option value="" t-att-selected="!this.state.filters.posConfigId" t-out="this.t('all_pos')"/>
                         <t t-foreach="this.state.data.pos_configs" t-as="cfg" t-key="cfg.id">
-                            <option t-att-value="cfg.id" t-att-selected="this.state.filters.posConfigId == cfg.id">
-                                <t t-out="cfg.name"/>
-                            </option>
+                            <option t-att-value="cfg.id" t-att-selected="this.state.filters.posConfigId == cfg.id" t-out="cfg.name"/>
                         </t>
                     </select>
 
-                    <!-- POS Category Filter -->
                     <select class="form-select form-select-sm" style="width: auto;"
                             t-on-change="(ev) => this.onPosCategFilterChange(ev)">
-                        <option value="" t-att-selected="!this.state.filters.posCategId">كل التصنيفات (All Categories)</option>
+                        <option value="" t-att-selected="!this.state.filters.posCategId" t-out="this.t('all_categories')"/>
                         <t t-foreach="this.state.data.pos_categories" t-as="cat" t-key="cat.id">
-                            <option t-att-value="cat.id" t-att-selected="this.state.filters.posCategId == cat.id">
-                                <t t-out="cat.name"/>
-                            </option>
+                            <option t-att-value="cat.id" t-att-selected="this.state.filters.posCategId == cat.id" t-out="cat.name"/>
                         </t>
                     </select>
 
-                    <button class="btn btn-sm btn-outline-secondary" t-on-click="() => this.loadData()">
+                    <button type="button" class="btn btn-sm btn-light border" t-on-click="() => this.loadData()">
                         <i class="oi" data-icon="refresh"/>
                     </button>
                 </div>
             </div>
 
-            <!-- ================= NAVIGATION TABS (8 TABS + SETTINGS) ================= -->
-            <div class="bg-white border-bottom px-3 pt-2">
-                <ul class="nav nav-tabs flex-wrap">
-                    <li class="nav-item"><a class="nav-link" t-att-class="{active: this.state.activeTab === 'analytics'}" href="#" t-on-click.prevent="() => this.setTab('analytics')">1. التحليلات</a></li>
-                    <li class="nav-item"><a class="nav-link" t-att-class="{active: this.state.activeTab === 'production'}" href="#" t-on-click.prevent="() => this.setTab('production')">2. الإنتاج والبطاقة المخزنية</a></li>
-                    <li class="nav-item"><a class="nav-link" t-att-class="{active: this.state.activeTab === 'expenses'}" href="#" t-on-click.prevent="() => this.setTab('expenses')">3. المصاريف</a></li>
-                    <li class="nav-item"><a class="nav-link" t-att-class="{active: this.state.activeTab === 'losses'}" href="#" t-on-click.prevent="() => this.setTab('losses')">4. الخسائر</a></li>
-                    <li class="nav-item"><a class="nav-link" t-att-class="{active: this.state.activeTab === 'purchases'}" href="#" t-on-click.prevent="() => this.setTab('purchases')">5. السلعة والمشتريات</a></li>
-                    <li class="nav-item"><a class="nav-link" t-att-class="{active: this.state.activeTab === 'pastry'}" href="#" t-on-click.prevent="() => this.setTab('pastry')">6. الباتيسري والتسوية الذكية</a></li>
-                    <li class="nav-item"><a class="nav-link" t-att-class="{active: this.state.activeTab === 'coffee'}" href="#" t-on-click.prevent="() => this.setTab('coffee')">7. القهوة</a></li>
-                    <li class="nav-item"><a class="nav-link" t-att-class="{active: this.state.activeTab === 'accounting_ai'}" href="#" t-on-click.prevent="() => this.setTab('accounting_ai')">8. الحساب والذكاء الاصطناعي (AI)</a></li>
-                    <li class="nav-item ms-auto"><a class="nav-link text-secondary" t-att-class="{active: this.state.activeTab === 'settings'}" href="#" t-on-click.prevent="() => this.setTab('settings')"><i class="oi me-1" data-icon="settings"/>الإعدادات</a></li>
-                </ul>
+            <!-- ================= CLEAN PILL NAVIGATION ================= -->
+            <div class="aio-nav-bar px-3 py-2 d-flex align-items-center gap-1">
+                <button type="button" class="aio-tab-btn" t-att-class="{active: this.state.activeTab === 'analytics'}" t-on-click="() => this.setTab('analytics')">
+                    <i class="oi" data-icon="bar_chart"/><span t-out="this.t('tab_analytics')"/>
+                </button>
+                <button type="button" class="aio-tab-btn" t-att-class="{active: this.state.activeTab === 'production'}" t-on-click="() => this.setTab('production')">
+                    <i class="oi" data-icon="precision_manufacturing"/><span t-out="this.t('tab_production')"/>
+                </button>
+                <button type="button" class="aio-tab-btn" t-att-class="{active: this.state.activeTab === 'expenses'}" t-on-click="() => this.setTab('expenses')">
+                    <i class="oi" data-icon="receipt_long"/><span t-out="this.t('tab_expenses')"/>
+                </button>
+                <button type="button" class="aio-tab-btn" t-att-class="{active: this.state.activeTab === 'losses'}" t-on-click="() => this.setTab('losses')">
+                    <i class="oi" data-icon="warning"/><span t-out="this.t('tab_losses')"/>
+                </button>
+                <button type="button" class="aio-tab-btn" t-att-class="{active: this.state.activeTab === 'purchases'}" t-on-click="() => this.setTab('purchases')">
+                    <i class="oi" data-icon="shopping_bag"/><span t-out="this.t('tab_purchases')"/>
+                </button>
+                <button type="button" class="aio-tab-btn" t-att-class="{active: this.state.activeTab === 'pastry'}" t-on-click="() => this.setTab('pastry')">
+                    <i class="oi" data-icon="payments"/><span t-out="this.t('tab_pastry')"/>
+                </button>
+                <button type="button" class="aio-tab-btn" t-att-class="{active: this.state.activeTab === 'coffee'}" t-on-click="() => this.setTab('coffee')">
+                    <i class="oi" data-icon="coffee"/><span t-out="this.t('tab_coffee')"/>
+                </button>
+                <button type="button" class="aio-tab-btn" t-att-class="{active: this.state.activeTab === 'accounting_ai'}" t-on-click="() => this.setTab('accounting_ai')">
+                    <i class="oi" data-icon="book"/><span t-out="this.t('tab_accounting_ai')"/>
+                </button>
+                <button type="button" class="aio-tab-btn" t-att-class="{active: this.state.activeTab === 'automations'}" t-on-click="() => this.setTab('automations')">
+                    <i class="oi" data-icon="schedule"/><span t-out="this.t('tab_automations')"/>
+                </button>
+                <button type="button" class="aio-tab-btn ms-auto" t-att-class="{active: this.state.activeTab === 'settings'}" t-on-click="() => this.setTab('settings')">
+                    <i class="oi" data-icon="settings"/><span t-out="this.t('tab_settings')"/>
+                </button>
             </div>
 
             <!-- ================= MAIN CONTENT ================= -->
-            <div class="flex-grow-1 p-3">
+            <div class="aio-content flex-grow-1 p-3">
                 <t t-if="this.state.loading">
                     <div class="d-flex justify-content-center align-items-center py-5">
                         <div class="spinner-border text-primary"/>
@@ -84,83 +106,81 @@
                 </t>
                 <t t-else="">
 
-                    <!-- ================= TAB 1: ANALYTICS ================= -->
-                    <div t-if="this.state.activeTab === 'analytics'">
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-4 col-xl-2">
-                                <div class="card aio-kpi-card kpi-green p-3">
-                                    <small class="text-muted fw-bold">إجمالي المبيعات</small>
-                                    <h4 class="fw-bold text-success m-0 mt-1" t-out="this.formatDH(this.state.data.kpis.total_sales)"/>
+                    <!-- ================= 1. ANALYTICS ================= -->
+                    <div t-if="this.state.activeTab === 'analytics'" class="d-flex flex-column gap-3">
+                        <div class="row g-3">
+                            <div class="col-6 col-md-4 col-xl-2">
+                                <div class="aio-kpi">
+                                    <div class="aio-kpi-label" t-out="this.t('kpi_sales')"/>
+                                    <div class="aio-kpi-value text-success" t-out="this.formatDH(this.state.data.kpis.total_sales)"/>
                                 </div>
                             </div>
-                            <div class="col-md-4 col-xl-2">
-                                <div class="card aio-kpi-card p-3">
-                                    <small class="text-muted fw-bold">قيمة الإنتاج</small>
-                                    <h4 class="fw-bold text-primary m-0 mt-1" t-out="this.formatDH(this.state.data.kpis.total_production_value)"/>
+                            <div class="col-6 col-md-4 col-xl-2">
+                                <div class="aio-kpi">
+                                    <div class="aio-kpi-label" t-out="this.t('kpi_production')"/>
+                                    <div class="aio-kpi-value text-dark" t-out="this.formatDH(this.state.data.kpis.total_production_value)"/>
                                 </div>
                             </div>
-                            <div class="col-md-4 col-xl-2">
-                                <div class="card aio-kpi-card kpi-orange p-3">
-                                    <small class="text-muted fw-bold">المصاريف للفترة</small>
-                                    <h4 class="fw-bold text-warning m-0 mt-1" t-out="this.formatDH(this.state.data.kpis.total_expenses)"/>
+                            <div class="col-6 col-md-4 col-xl-2">
+                                <div class="aio-kpi">
+                                    <div class="aio-kpi-label" t-out="this.t('kpi_expenses')"/>
+                                    <div class="aio-kpi-value text-dark" t-out="this.formatDH(this.state.data.kpis.total_expenses)"/>
                                 </div>
                             </div>
-                            <div class="col-md-4 col-xl-2">
-                                <div class="card aio-kpi-card kpi-red p-3">
-                                    <small class="text-muted fw-bold">إجمالي الخسائر</small>
-                                    <h4 class="fw-bold text-danger m-0 mt-1" t-out="this.formatDH(this.state.data.kpis.total_losses)"/>
+                            <div class="col-6 col-md-4 col-xl-2">
+                                <div class="aio-kpi">
+                                    <div class="aio-kpi-label" t-out="this.t('kpi_losses')"/>
+                                    <div class="aio-kpi-value text-danger" t-out="this.formatDH(this.state.data.kpis.total_losses)"/>
                                 </div>
                             </div>
-                            <div class="col-md-4 col-xl-2">
-                                <div class="card aio-kpi-card kpi-orange p-3">
-                                    <small class="text-muted fw-bold">تكلفة السلعة</small>
-                                    <h4 class="fw-bold text-secondary m-0 mt-1" t-out="this.formatDH(this.state.data.kpis.total_purchases)"/>
+                            <div class="col-6 col-md-4 col-xl-2">
+                                <div class="aio-kpi">
+                                    <div class="aio-kpi-label" t-out="this.t('kpi_purchases')"/>
+                                    <div class="aio-kpi-value text-dark" t-out="this.formatDH(this.state.data.kpis.total_purchases)"/>
                                 </div>
                             </div>
-                            <div class="col-md-4 col-xl-2">
-                                <div class="card aio-kpi-card kpi-purple p-3">
-                                    <small class="text-muted fw-bold">صافي الربح الكلي</small>
-                                    <h4 t-att-class="'fw-bold m-0 mt-1 ' + (this.state.data.kpis.total_net_profit &lt; 0 ? 'text-danger' : 'text-success')"
-                                        t-out="this.formatDH(this.state.data.kpis.total_net_profit)"/>
+                            <div class="col-6 col-md-4 col-xl-2">
+                                <div class="aio-kpi">
+                                    <div class="aio-kpi-label" t-out="this.t('kpi_net_profit')"/>
+                                    <div t-att-class="'aio-kpi-value ' + (this.state.data.kpis.total_net_profit &lt; 0 ? 'text-danger' : 'text-success')"
+                                         t-out="this.formatDH(this.state.data.kpis.total_net_profit)"/>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="card p-3 shadow-sm">
-                            <h6 class="fw-bold mb-3">مقارنة الأداء المالي: الباتيسري مقابل القهوة</h6>
-                            <div style="height: 320px;">
+                        <div class="aio-card p-3">
+                            <h6 class="fw-semibold mb-3 text-dark" t-out="this.t('chart_title')"/>
+                            <div style="height: 300px;">
                                 <canvas id="aioOverviewChart"/>
                             </div>
                         </div>
                     </div>
 
-                    <!-- ================= TAB 2: PRODUCTION & STORABLE CARD ================= -->
-                    <div t-if="this.state.activeTab === 'production'" class="row g-4">
-                        <!-- Daily Production Entry by Category -->
+                    <!-- ================= 2. PRODUCTION ================= -->
+                    <div t-if="this.state.activeTab === 'production'" class="row g-3">
                         <div class="col-lg-8">
-                            <div class="card shadow-sm">
-                                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                            <div class="aio-card p-3">
+                                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                                     <div class="d-flex align-items-center gap-2">
-                                        <span class="fw-bold">إدخال الإنتاج اليومي لتاريخ:</span>
+                                        <span class="fw-semibold" t-out="this.t('daily_production')"/>
                                         <input type="date" class="form-control form-control-sm" style="width: auto;"
                                                t-att-value="this.state.filters.productionDate"
                                                t-on-change="(ev) => this.onProductionDateChange(ev)"/>
                                     </div>
-                                    <button class="btn btn-primary btn-sm" t-on-click="() => this.saveProduction()">
-                                        حفظ كميات الإنتاج
-                                    </button>
+                                    <button type="button" class="btn btn-primary btn-sm" t-on-click="() => this.saveProduction()" t-out="this.t('save_production')"/>
                                 </div>
-                                <div class="card-body">
-                                    <t t-foreach="this.state.data.production_groups" t-as="grp" t-key="grp.categ_id">
-                                        <div class="mb-4 border rounded p-2 bg-light">
-                                            <h6 class="fw-bold text-primary mb-2" t-out="grp.categ_name"/>
-                                            <table class="table table-sm bg-white mb-0">
+
+                                <t t-foreach="this.state.data.production_groups" t-as="grp" t-key="grp.categ_id">
+                                    <div class="mb-3">
+                                        <div class="fw-semibold text-primary small mb-2" t-out="grp.categ_name"/>
+                                        <div class="border rounded overflow-hidden">
+                                            <table class="table aio-table">
                                                 <thead>
                                                     <tr>
-                                                        <th>المنتج</th>
-                                                        <th>سعر البيع</th>
-                                                        <th>المخزون الحالي</th>
-                                                        <th style="width: 150px;">كمية الإنتاج</th>
+                                                        <th t-out="this.t('product')"/>
+                                                        <th t-out="this.t('sale_price')"/>
+                                                        <th t-out="this.t('stock')"/>
+                                                        <th style="width: 140px;" t-out="this.t('qty_produced')"/>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -170,7 +190,7 @@
                                                         <td t-out="p.qty_available"/>
                                                         <td>
                                                             <input type="number" step="1" min="0"
-                                                                   class="form-control form-control-sm fw-bold"
+                                                                   class="form-control form-control-sm fw-semibold"
                                                                    t-att-value="p.today_qty"
                                                                    t-on-input="(ev) => this.updateField(p, 'today_qty', ev, true)"/>
                                                         </td>
@@ -178,43 +198,39 @@
                                                 </tbody>
                                             </table>
                                         </div>
-                                    </t>
-                                </div>
+                                    </div>
+                                </t>
                             </div>
                         </div>
 
-                        <!-- Permanent Storable Products Card -->
                         <div class="col-lg-4">
-                            <div class="card shadow-sm border-primary">
-                                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                                    <span class="fw-bold">بطاقة المنتجات المتتبعة مخزنياً</span>
-                                    <button class="btn btn-sm btn-warning fw-bold" t-on-click="() => this.toggleAllTrackedStorable()">
-                                        <t t-out="this.state.data.tracked_card.all_active ? 'إيقاف تتبع المخزون للكل' : 'تفعيل تتبع المخزون للكل'"/>
-                                    </button>
+                            <div class="aio-card p-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-semibold" t-out="this.t('tracked_card_title')"/>
+                                    <button type="button" class="btn btn-sm btn-outline-primary"
+                                            t-on-click="() => this.toggleAllTrackedStorable()"
+                                            t-out="this.state.data.tracked_card.all_active ? this.t('disable_all_stock') : this.t('enable_all_stock')"/>
                                 </div>
-                                <div class="card-body">
-                                    <p class="small text-muted">
-                                        تُحفظ المنتجات هنا بشكل دائم، ويمكنك إطفاء أو إعادة تفعيل تتبع المخزون (<code>is_storable</code>) لها جميعاً بضغطة واحدة دون إزالتها من البطاقة.
-                                    </p>
-                                    <div class="d-flex gap-2 mb-3">
-                                        <select class="form-select form-select-sm"
-                                                t-on-change="(ev) => this.updateField(this.state, 'selectedCandidateId', ev)">
-                                            <option value="" t-att-selected="!this.state.selectedCandidateId">اختر منتجاً متتبعاً لإضافته...</option>
-                                            <t t-foreach="this.state.data.tracked_card.candidates" t-as="c" t-key="c.id">
-                                                <option t-att-value="c.id" t-att-selected="this.state.selectedCandidateId == c.id">
-                                                    <t t-out="c.name"/>
-                                                </option>
-                                            </t>
-                                        </select>
-                                        <button class="btn btn-sm btn-success" t-on-click="() => this.addTrackedProduct()">إضافة</button>
-                                    </div>
+                                <p class="small text-muted mb-3" t-out="this.t('tracked_card_desc')"/>
 
-                                    <table class="table table-sm table-bordered">
+                                <div class="d-flex gap-2 mb-3">
+                                    <select class="form-select form-select-sm"
+                                            t-on-change="(ev) => this.updateField(this.state, 'selectedCandidateId', ev)">
+                                        <option value="" t-att-selected="!this.state.selectedCandidateId" t-out="this.t('pick_storable')"/>
+                                        <t t-foreach="this.state.data.tracked_card.candidates" t-as="c" t-key="c.id">
+                                            <option t-att-value="c.id" t-att-selected="this.state.selectedCandidateId == c.id" t-out="c.name"/>
+                                        </t>
+                                    </select>
+                                    <button type="button" class="btn btn-sm btn-dark" t-on-click="() => this.addTrackedProduct()" t-out="this.t('add')"/>
+                                </div>
+
+                                <div class="border rounded overflow-hidden">
+                                    <table class="table aio-table">
                                         <thead>
                                             <tr>
-                                                <th>المنتج</th>
-                                                <th>الحالة</th>
-                                                <th>المخزون</th>
+                                                <th t-out="this.t('product')"/>
+                                                <th t-out="this.t('status')"/>
+                                                <th t-out="this.t('stock')"/>
                                                 <th/>
                                             </tr>
                                         </thead>
@@ -222,12 +238,12 @@
                                             <tr t-foreach="this.state.data.tracked_card.products" t-as="tp" t-key="tp.id">
                                                 <td t-out="tp.name"/>
                                                 <td>
-                                                    <span t-att-class="'badge ' + (tp.is_storable ? 'bg-success' : 'bg-secondary')"
-                                                          t-out="tp.is_storable ? 'مفعل' : 'متوقف'"/>
+                                                    <span t-att-class="'badge rounded-pill ' + (tp.is_storable ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary')"
+                                                          t-out="tp.is_storable ? this.t('active_badge') : this.t('paused_badge')"/>
                                                 </td>
                                                 <td t-out="tp.qty_available"/>
-                                                <td class="text-center">
-                                                    <button class="btn btn-sm btn-link text-danger p-0" t-on-click="() => this.removeTrackedProduct(tp.id)">
+                                                <td class="text-end">
+                                                    <button type="button" class="btn btn-sm btn-link text-danger p-0" t-on-click="() => this.removeTrackedProduct(tp.id)">
                                                         <i class="oi" data-icon="delete"/>
                                                     </button>
                                                 </td>
@@ -239,88 +255,88 @@
                         </div>
                     </div>
 
-                    <!-- ================= TAB 3: EXPENSES ================= -->
-                    <div t-if="this.state.activeTab === 'expenses'" class="card shadow-sm">
-                        <div class="card-header bg-white fw-bold">إدارة المصاريف وتوزيعها التلقائي حسب الفترة (<t t-out="this.state.data.filter_info.num_days"/> يوم)</div>
-                        <div class="card-body">
-                            <div class="row g-2 align-items-end mb-3 p-2 bg-light rounded border">
-                                <div class="col-md-3">
-                                    <label class="small fw-bold">البيان</label>
-                                    <input type="text" class="form-control form-control-sm" placeholder="مثال: فاتورة الكهرباء"
-                                           t-att-value="this.state.newExpense.name"
-                                           t-on-input="(ev) => this.updateField(this.state.newExpense, 'name', ev)"/>
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="small fw-bold">النوع</label>
-                                    <select class="form-select form-select-sm"
-                                            t-on-change="(ev) => this.updateField(this.state.newExpense, 'expense_type', ev)">
-                                        <option value="internet" t-att-selected="this.state.newExpense.expense_type === 'internet'">إنترنت</option>
-                                        <option value="electricity" t-att-selected="this.state.newExpense.expense_type === 'electricity'">كهرباء</option>
-                                        <option value="water" t-att-selected="this.state.newExpense.expense_type === 'water'">ماء</option>
-                                        <option value="salaries" t-att-selected="this.state.newExpense.expense_type === 'salaries'">رواتب العمال</option>
-                                        <option value="monthly_tax" t-att-selected="this.state.newExpense.expense_type === 'monthly_tax'">ضريبة شهرية</option>
-                                        <option value="annual_tax" t-att-selected="this.state.newExpense.expense_type === 'annual_tax'">ضريبة سنوية</option>
-                                        <option value="fuel" t-att-selected="this.state.newExpense.expense_type === 'fuel'">وقود</option>
-                                        <option value="other" t-att-selected="this.state.newExpense.expense_type === 'other'">مصاريف أخرى</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="small fw-bold">القسم</label>
-                                    <select class="form-select form-select-sm"
-                                            t-on-change="(ev) => this.updateField(this.state.newExpense, 'department', ev)">
-                                        <option value="pastry" t-att-selected="this.state.newExpense.department === 'pastry'">باتيسري</option>
-                                        <option value="coffee" t-att-selected="this.state.newExpense.department === 'coffee'">قهوة</option>
-                                        <option value="shared" t-att-selected="this.state.newExpense.department === 'shared'">مشترك</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="small fw-bold">الدورية</label>
-                                    <select class="form-select form-select-sm"
-                                            t-on-change="(ev) => this.updateField(this.state.newExpense, 'periodicity', ev)">
-                                        <option value="daily" t-att-selected="this.state.newExpense.periodicity === 'daily'">يومي</option>
-                                        <option value="monthly" t-att-selected="this.state.newExpense.periodicity === 'monthly'">شهري (÷ 30)</option>
-                                        <option value="annual" t-att-selected="this.state.newExpense.periodicity === 'annual'">سنوي (÷ 365)</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="small fw-bold">المبلغ (DH)</label>
-                                    <input type="number" step="0.01" class="form-control form-control-sm"
-                                           t-att-value="this.state.newExpense.amount"
-                                           t-on-input="(ev) => this.updateField(this.state.newExpense, 'amount', ev, true)"/>
-                                </div>
-                                <div class="col-md-1">
-                                    <button class="btn btn-sm btn-primary w-100" t-on-click="() => this.addExpense()">إضافة</button>
-                                </div>
+                    <!-- ================= 3. EXPENSES ================= -->
+                    <div t-if="this.state.activeTab === 'expenses'" class="aio-card p-3">
+                        <h6 class="fw-semibold mb-3" t-out="this.t('expenses_title')"/>
+                        <div class="aio-inline-form row g-2 align-items-end mb-3">
+                            <div class="col-md-3">
+                                <label class="small text-muted fw-semibold" t-out="this.t('description')"/>
+                                <input type="text" class="form-control form-control-sm" t-att-placeholder="this.t('expense_placeholder')"
+                                       t-att-value="this.state.newExpense.name"
+                                       t-on-input="(ev) => this.updateField(this.state.newExpense, 'name', ev)"/>
                             </div>
+                            <div class="col-md-2">
+                                <label class="small text-muted fw-semibold" t-out="this.t('type')"/>
+                                <select class="form-select form-select-sm"
+                                        t-on-change="(ev) => this.updateField(this.state.newExpense, 'expense_type', ev)">
+                                    <option value="internet" t-att-selected="this.state.newExpense.expense_type === 'internet'" t-out="this.t('exp_internet')"/>
+                                    <option value="electricity" t-att-selected="this.state.newExpense.expense_type === 'electricity'" t-out="this.t('exp_electricity')"/>
+                                    <option value="water" t-att-selected="this.state.newExpense.expense_type === 'water'" t-out="this.t('exp_water')"/>
+                                    <option value="salaries" t-att-selected="this.state.newExpense.expense_type === 'salaries'" t-out="this.t('exp_salaries')"/>
+                                    <option value="monthly_tax" t-att-selected="this.state.newExpense.expense_type === 'monthly_tax'" t-out="this.t('exp_monthly_tax')"/>
+                                    <option value="annual_tax" t-att-selected="this.state.newExpense.expense_type === 'annual_tax'" t-out="this.t('exp_annual_tax')"/>
+                                    <option value="fuel" t-att-selected="this.state.newExpense.expense_type === 'fuel'" t-out="this.t('exp_fuel')"/>
+                                    <option value="other" t-att-selected="this.state.newExpense.expense_type === 'other'" t-out="this.t('exp_other')"/>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="small text-muted fw-semibold" t-out="this.t('department')"/>
+                                <select class="form-select form-select-sm"
+                                        t-on-change="(ev) => this.updateField(this.state.newExpense, 'department', ev)">
+                                    <option value="pastry" t-att-selected="this.state.newExpense.department === 'pastry'" t-out="this.t('pastry')"/>
+                                    <option value="coffee" t-att-selected="this.state.newExpense.department === 'coffee'" t-out="this.t('coffee')"/>
+                                    <option value="shared" t-att-selected="this.state.newExpense.department === 'shared'" t-out="this.t('shared')"/>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="small text-muted fw-semibold" t-out="this.t('periodicity')"/>
+                                <select class="form-select form-select-sm"
+                                        t-on-change="(ev) => this.updateField(this.state.newExpense, 'periodicity', ev)">
+                                    <option value="daily" t-att-selected="this.state.newExpense.periodicity === 'daily'" t-out="this.t('per_daily')"/>
+                                    <option value="monthly" t-att-selected="this.state.newExpense.periodicity === 'monthly'" t-out="this.t('per_monthly')"/>
+                                    <option value="annual" t-att-selected="this.state.newExpense.periodicity === 'annual'" t-out="this.t('per_annual')"/>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="small text-muted fw-semibold" t-out="this.t('amount')"/>
+                                <input type="number" step="0.01" class="form-control form-control-sm"
+                                       t-att-value="this.state.newExpense.amount"
+                                       t-on-input="(ev) => this.updateField(this.state.newExpense, 'amount', ev, true)"/>
+                            </div>
+                            <div class="col-md-1">
+                                <button type="button" class="btn btn-sm btn-primary w-100" t-on-click="() => this.addExpense()" t-out="this.t('add')"/>
+                            </div>
+                        </div>
 
-                            <table class="table table-striped table-sm">
+                        <div class="border rounded overflow-hidden">
+                            <table class="table aio-table">
                                 <thead>
                                     <tr>
-                                        <th>البيان</th>
-                                        <th>النوع</th>
-                                        <th>القسم</th>
-                                        <th>الدورية</th>
-                                        <th>المبلغ الأصلي</th>
-                                        <th>المعدل اليومي</th>
-                                        <th>تكلفة الفترة</th>
-                                        <th>حصة الباتيسري</th>
-                                        <th>حصة القهوة</th>
+                                        <th t-out="this.t('description')"/>
+                                        <th t-out="this.t('type')"/>
+                                        <th t-out="this.t('department')"/>
+                                        <th t-out="this.t('periodicity')"/>
+                                        <th t-out="this.t('amount')"/>
+                                        <th t-out="this.t('daily_rate')"/>
+                                        <th t-out="this.t('period_cost')"/>
+                                        <th t-out="this.t('pastry_share')"/>
+                                        <th t-out="this.t('coffee_share')"/>
                                         <th/>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr t-foreach="this.state.data.expenses" t-as="exp" t-key="exp.id">
-                                        <td t-out="exp.name"/>
-                                        <td t-out="exp.expense_type"/>
-                                        <td t-out="exp.department"/>
-                                        <td t-out="exp.periodicity"/>
+                                        <td class="fw-medium" t-out="exp.name"/>
+                                        <td t-out="this.t('exp_' + exp.expense_type)"/>
+                                        <td t-out="this.t(exp.department)"/>
+                                        <td t-out="this.t('per_' + exp.periodicity)"/>
                                         <td t-out="this.formatDH(exp.amount)"/>
                                         <td t-out="this.formatDH(exp.daily_rate)"/>
-                                        <td class="fw-bold" t-out="this.formatDH(exp.period_cost)"/>
-                                        <td class="text-primary" t-out="this.formatDH(exp.pastry_share)"/>
-                                        <td class="text-success" t-out="this.formatDH(exp.coffee_share)"/>
-                                        <td>
-                                            <button class="btn btn-sm btn-link text-danger p-0" t-on-click="() => this.deleteRecord('all_in_one.expense', exp.id)">
+                                        <td class="fw-semibold" t-out="this.formatDH(exp.period_cost)"/>
+                                        <td t-out="this.formatDH(exp.pastry_share)"/>
+                                        <td t-out="this.formatDH(exp.coffee_share)"/>
+                                        <td class="text-end">
+                                            <button type="button" class="btn btn-sm btn-link text-danger p-0" t-on-click="() => this.deleteRecord('all_in_one.expense', exp.id)">
                                                 <i class="oi" data-icon="delete"/>
                                             </button>
                                         </td>
@@ -330,86 +346,84 @@
                         </div>
                     </div>
 
-                    <!-- ================= TAB 4: LOSSES & WASTE ================= -->
-                    <div t-if="this.state.activeTab === 'losses'" class="d-flex flex-column gap-4">
-                        <div class="card shadow-sm">
-                            <div class="card-header bg-white fw-bold">تسجيل الخسائر اليومية (وجبات العمال، تالف، منتهي الصلاحية)</div>
-                            <div class="card-body">
-                                <div class="row g-2 align-items-end mb-3 p-2 bg-light rounded border">
-                                    <div class="col-md-2">
-                                        <label class="small fw-bold">التاريخ</label>
-                                        <input type="date" class="form-control form-control-sm"
-                                               t-att-value="this.state.newLoss.date"
-                                               t-on-change="(ev) => this.updateField(this.state.newLoss, 'date', ev)"/>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <label class="small fw-bold">نوع الخسارة</label>
-                                        <select class="form-select form-select-sm"
-                                                t-on-change="(ev) => this.updateField(this.state.newLoss, 'loss_type', ev)">
-                                            <option value="staff_meals" t-att-selected="this.state.newLoss.loss_type === 'staff_meals'">وجبات وفطور العمال</option>
-                                            <option value="damaged" t-att-selected="this.state.newLoss.loss_type === 'damaged'">مواد تالفة</option>
-                                            <option value="expired" t-att-selected="this.state.newLoss.loss_type === 'expired'">منتهية الصلاحية نهاية اليوم</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <label class="small fw-bold">القسم</label>
-                                        <select class="form-select form-select-sm"
-                                                t-on-change="(ev) => this.updateField(this.state.newLoss, 'department', ev)">
-                                            <option value="pastry" t-att-selected="this.state.newLoss.department === 'pastry'">باتيسري</option>
-                                            <option value="coffee" t-att-selected="this.state.newLoss.department === 'coffee'">قهوة</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <label class="small fw-bold">المنتج</label>
-                                        <select class="form-select form-select-sm"
-                                                t-on-change="(ev) => this.updateField(this.state.newLoss, 'product_id', ev)">
-                                            <option value="" t-att-selected="!this.state.newLoss.product_id">-- اختر منتجاً --</option>
-                                            <t t-foreach="this.state.data.all_pos_products" t-as="p" t-key="p.id">
-                                                <option t-att-value="p.id" t-att-selected="this.state.newLoss.product_id == p.id">
-                                                    <t t-out="p.display_name"/>
-                                                </option>
-                                            </t>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-1">
-                                        <label class="small fw-bold">الكمية</label>
-                                        <input type="number" step="0.1" class="form-control form-control-sm"
-                                               t-att-value="this.state.newLoss.quantity"
-                                               t-on-input="(ev) => this.updateField(this.state.newLoss, 'quantity', ev, true)"/>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <label class="small fw-bold">قيمة الوحدة (DH)</label>
-                                        <input type="number" step="0.1" class="form-control form-control-sm"
-                                               t-att-value="this.state.newLoss.unit_value"
-                                               t-on-input="(ev) => this.updateField(this.state.newLoss, 'unit_value', ev, true)"/>
-                                    </div>
-                                    <div class="col-md-1">
-                                        <button class="btn btn-sm btn-danger w-100" t-on-click="() => this.addLoss()">تسجيل</button>
-                                    </div>
+                    <!-- ================= 4. LOSSES ================= -->
+                    <div t-if="this.state.activeTab === 'losses'" class="d-flex flex-column gap-3">
+                        <div class="aio-card p-3">
+                            <h6 class="fw-semibold mb-3" t-out="this.t('manual_losses_title')"/>
+                            <div class="aio-inline-form row g-2 align-items-end mb-3">
+                                <div class="col-md-2">
+                                    <label class="small text-muted fw-semibold" t-out="this.t('date')"/>
+                                    <input type="date" class="form-control form-control-sm"
+                                           t-att-value="this.state.newLoss.date"
+                                           t-on-change="(ev) => this.updateField(this.state.newLoss, 'date', ev)"/>
                                 </div>
+                                <div class="col-md-2">
+                                    <label class="small text-muted fw-semibold" t-out="this.t('loss_type')"/>
+                                    <select class="form-select form-select-sm"
+                                            t-on-change="(ev) => this.updateField(this.state.newLoss, 'loss_type', ev)">
+                                        <option value="staff_meals" t-att-selected="this.state.newLoss.loss_type === 'staff_meals'" t-out="this.t('loss_staff_meals')"/>
+                                        <option value="damaged" t-att-selected="this.state.newLoss.loss_type === 'damaged'" t-out="this.t('loss_damaged')"/>
+                                        <option value="expired" t-att-selected="this.state.newLoss.loss_type === 'expired'" t-out="this.t('loss_expired')"/>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="small text-muted fw-semibold" t-out="this.t('department')"/>
+                                    <select class="form-select form-select-sm"
+                                            t-on-change="(ev) => this.updateField(this.state.newLoss, 'department', ev)">
+                                        <option value="pastry" t-att-selected="this.state.newLoss.department === 'pastry'" t-out="this.t('pastry')"/>
+                                        <option value="coffee" t-att-selected="this.state.newLoss.department === 'coffee'" t-out="this.t('coffee')"/>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="small text-muted fw-semibold" t-out="this.t('product')"/>
+                                    <select class="form-select form-select-sm"
+                                            t-on-change="(ev) => this.updateField(this.state.newLoss, 'product_id', ev)">
+                                        <option value="" t-att-selected="!this.state.newLoss.product_id" t-out="this.t('select_product')"/>
+                                        <t t-foreach="this.state.data.all_pos_products" t-as="p" t-key="p.id">
+                                            <option t-att-value="p.id" t-att-selected="this.state.newLoss.product_id == p.id" t-out="p.display_name"/>
+                                        </t>
+                                    </select>
+                                </div>
+                                <div class="col-md-1">
+                                    <label class="small text-muted fw-semibold" t-out="this.t('qty')"/>
+                                    <input type="number" step="0.1" class="form-control form-control-sm"
+                                           t-att-value="this.state.newLoss.quantity"
+                                           t-on-input="(ev) => this.updateField(this.state.newLoss, 'quantity', ev, true)"/>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="small text-muted fw-semibold" t-out="this.t('unit_value')"/>
+                                    <input type="number" step="0.1" class="form-control form-control-sm"
+                                           t-att-value="this.state.newLoss.unit_value"
+                                           t-on-input="(ev) => this.updateField(this.state.newLoss, 'unit_value', ev, true)"/>
+                                </div>
+                                <div class="col-md-1">
+                                    <button type="button" class="btn btn-sm btn-danger w-100" t-on-click="() => this.addLoss()" t-out="this.t('record')"/>
+                                </div>
+                            </div>
 
-                                <table class="table table-sm table-striped">
+                            <div class="border rounded overflow-hidden">
+                                <table class="table aio-table">
                                     <thead>
                                         <tr>
-                                            <th>التاريخ</th>
-                                            <th>النوع</th>
-                                            <th>القسم</th>
-                                            <th>المنتج / البيان</th>
-                                            <th>الكمية</th>
-                                            <th>الإجمالي</th>
+                                            <th t-out="this.t('date')"/>
+                                            <th t-out="this.t('loss_type')"/>
+                                            <th t-out="this.t('department')"/>
+                                            <th t-out="this.t('product')"/>
+                                            <th t-out="this.t('qty')"/>
+                                            <th t-out="this.t('total')"/>
                                             <th/>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr t-foreach="this.state.data.manual_losses" t-as="l" t-key="l.id">
                                             <td t-out="l.date"/>
-                                            <td t-out="l.loss_type"/>
-                                            <td t-out="l.department"/>
+                                            <td t-out="this.t('loss_' + l.loss_type)"/>
+                                            <td t-out="this.t(l.department)"/>
                                             <td t-out="l.product_name"/>
                                             <td t-out="l.quantity"/>
-                                            <td class="text-danger fw-bold" t-out="this.formatDH(l.total_value)"/>
-                                            <td>
-                                                <button class="btn btn-sm btn-link text-danger p-0" t-on-click="() => this.deleteRecord('all_in_one.loss', l.id)">
+                                            <td class="text-danger fw-semibold" t-out="this.formatDH(l.total_value)"/>
+                                            <td class="text-end">
+                                                <button type="button" class="btn btn-sm btn-link text-danger p-0" t-on-click="() => this.deleteRecord('all_in_one.loss', l.id)">
                                                     <i class="oi" data-icon="delete"/>
                                                 </button>
                                             </td>
@@ -419,26 +433,26 @@
                             </div>
                         </div>
 
-                        <div class="card shadow-sm">
-                            <div class="card-header bg-white fw-bold text-danger">النواقص المسجلة تلقائياً من تسويات الجرد (Inventory Adjustments)</div>
-                            <div class="card-body p-0">
-                                <table class="table table-sm table-striped mb-0">
+                        <div class="aio-card p-3">
+                            <h6 class="fw-semibold text-danger mb-3" t-out="this.t('auto_losses_title')"/>
+                            <div class="border rounded overflow-hidden">
+                                <table class="table aio-table">
                                     <thead>
                                         <tr>
-                                            <th>التاريخ</th>
-                                            <th>المنتج</th>
-                                            <th>القسم</th>
-                                            <th>الكمية المفقودة</th>
-                                            <th>القيمة الإجمالية</th>
+                                            <th t-out="this.t('date')"/>
+                                            <th t-out="this.t('product')"/>
+                                            <th t-out="this.t('department')"/>
+                                            <th t-out="this.t('missing_qty')"/>
+                                            <th t-out="this.t('total')"/>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr t-foreach="this.state.data.auto_inv_losses" t-as="al" t-key="al.id">
                                             <td t-out="al.date"/>
                                             <td t-out="al.product_name"/>
-                                            <td t-out="al.department"/>
+                                            <td t-out="this.t(al.department)"/>
                                             <td t-out="al.quantity"/>
-                                            <td class="text-danger fw-bold" t-out="this.formatDH(al.total_value)"/>
+                                            <td class="text-danger fw-semibold" t-out="this.formatDH(al.total_value)"/>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -446,65 +460,65 @@
                         </div>
                     </div>
 
-                    <!-- ================= TAB 5: RAW MATERIALS & PURCHASES ================= -->
-                    <div t-if="this.state.activeTab === 'purchases'" class="card shadow-sm">
-                        <div class="card-header bg-white fw-bold">السلعة والمواد الأولية القابلة للشراء المرتبطة بمنتجات البيع</div>
-                        <div class="card-body">
-                            <div class="row g-2 align-items-end mb-3 p-2 bg-light rounded border">
-                                <div class="col-md-2">
-                                    <label class="small fw-bold">التاريخ</label>
-                                    <input type="date" class="form-control form-control-sm"
-                                           t-att-value="this.state.newPurchase.date"
-                                           t-on-change="(ev) => this.updateField(this.state.newPurchase, 'date', ev)"/>
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="small fw-bold">السلعة (Can be Purchased)</label>
-                                    <select class="form-select form-select-sm"
-                                            t-on-change="(ev) => this.updateField(this.state.newPurchase, 'raw_product_id', ev)">
-                                        <option value="" t-att-selected="!this.state.newPurchase.raw_product_id">اختر السلعة...</option>
-                                        <t t-foreach="this.state.data.raw_materials_catalog" t-as="rm" t-key="rm.id">
-                                            <option t-att-value="rm.id" t-att-selected="this.state.newPurchase.raw_product_id == rm.id">
-                                                [<t t-out="rm.categ_name"/>] <t t-out="rm.name"/> ➔ (<t t-out="rm.final_product_name"/>)
-                                            </option>
-                                        </t>
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="small fw-bold">القسم</label>
-                                    <select class="form-select form-select-sm"
-                                            t-on-change="(ev) => this.updateField(this.state.newPurchase, 'department', ev)">
-                                        <option value="pastry" t-att-selected="this.state.newPurchase.department === 'pastry'">باتيسري</option>
-                                        <option value="coffee" t-att-selected="this.state.newPurchase.department === 'coffee'">قهوة</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="small fw-bold">الكمية</label>
-                                    <input type="number" step="0.1" class="form-control form-control-sm"
-                                           t-att-value="this.state.newPurchase.quantity"
-                                           t-on-input="(ev) => this.updateField(this.state.newPurchase, 'quantity', ev, true)"/>
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="small fw-bold">تكلفة الوحدة (DH)</label>
-                                    <input type="number" step="0.01" class="form-control form-control-sm"
-                                           t-att-value="this.state.newPurchase.unit_cost"
-                                           t-on-input="(ev) => this.updateField(this.state.newPurchase, 'unit_cost', ev, true)"/>
-                                </div>
-                                <div class="col-md-1">
-                                    <button class="btn btn-sm btn-primary w-100" t-on-click="() => this.addPurchase()">حفظ</button>
-                                </div>
+                    <!-- ================= 5. PURCHASES ================= -->
+                    <div t-if="this.state.activeTab === 'purchases'" class="aio-card p-3">
+                        <h6 class="fw-semibold mb-3" t-out="this.t('purchases_title')"/>
+                        <div class="aio-inline-form row g-2 align-items-end mb-3">
+                            <div class="col-md-2">
+                                <label class="small text-muted fw-semibold" t-out="this.t('date')"/>
+                                <input type="date" class="form-control form-control-sm"
+                                       t-att-value="this.state.newPurchase.date"
+                                       t-on-change="(ev) => this.updateField(this.state.newPurchase, 'date', ev)"/>
                             </div>
+                            <div class="col-md-3">
+                                <label class="small text-muted fw-semibold" t-out="this.t('raw_material')"/>
+                                <select class="form-select form-select-sm"
+                                        t-on-change="(ev) => this.updateField(this.state.newPurchase, 'raw_product_id', ev)">
+                                    <option value="" t-att-selected="!this.state.newPurchase.raw_product_id" t-out="this.t('select_raw')"/>
+                                    <t t-foreach="this.state.data.raw_materials_catalog" t-as="rm" t-key="rm.id">
+                                        <option t-att-value="rm.id" t-att-selected="this.state.newPurchase.raw_product_id == rm.id">
+                                            [<t t-out="rm.categ_name"/>] <t t-out="rm.name"/> → <t t-out="rm.final_product_name"/>
+                                        </option>
+                                    </t>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="small text-muted fw-semibold" t-out="this.t('department')"/>
+                                <select class="form-select form-select-sm"
+                                        t-on-change="(ev) => this.updateField(this.state.newPurchase, 'department', ev)">
+                                    <option value="pastry" t-att-selected="this.state.newPurchase.department === 'pastry'" t-out="this.t('pastry')"/>
+                                    <option value="coffee" t-att-selected="this.state.newPurchase.department === 'coffee'" t-out="this.t('coffee')"/>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="small text-muted fw-semibold" t-out="this.t('qty')"/>
+                                <input type="number" step="0.1" class="form-control form-control-sm"
+                                       t-att-value="this.state.newPurchase.quantity"
+                                       t-on-input="(ev) => this.updateField(this.state.newPurchase, 'quantity', ev, true)"/>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="small text-muted fw-semibold" t-out="this.t('unit_cost')"/>
+                                <input type="number" step="0.01" class="form-control form-control-sm"
+                                       t-att-value="this.state.newPurchase.unit_cost"
+                                       t-on-input="(ev) => this.updateField(this.state.newPurchase, 'unit_cost', ev, true)"/>
+                            </div>
+                            <div class="col-md-1">
+                                <button type="button" class="btn btn-sm btn-primary w-100" t-on-click="() => this.addPurchase()" t-out="this.t('save')"/>
+                            </div>
+                        </div>
 
-                            <table class="table table-sm table-striped">
+                        <div class="border rounded overflow-hidden">
+                            <table class="table aio-table">
                                 <thead>
                                     <tr>
-                                        <th>التاريخ</th>
-                                        <th>التصنيف</th>
-                                        <th>منتج البيع النهائي</th>
-                                        <th>السلعة المرتبطة</th>
-                                        <th>القسم</th>
-                                        <th>الكمية</th>
-                                        <th>تكلفة الوحدة</th>
-                                        <th>التكلفة الإجمالية</th>
+                                        <th t-out="this.t('date')"/>
+                                        <th t-out="this.t('category')"/>
+                                        <th t-out="this.t('final_product')"/>
+                                        <th t-out="this.t('raw_material')"/>
+                                        <th t-out="this.t('department')"/>
+                                        <th t-out="this.t('qty')"/>
+                                        <th t-out="this.t('unit_cost')"/>
+                                        <th t-out="this.t('total_cost')"/>
                                         <th/>
                                     </tr>
                                 </thead>
@@ -512,14 +526,14 @@
                                     <tr t-foreach="this.state.data.purchases" t-as="pe" t-key="pe.id">
                                         <td t-out="pe.date"/>
                                         <td t-out="pe.categ_name"/>
-                                        <td class="fw-bold text-primary" t-out="pe.final_product_name"/>
+                                        <td class="fw-semibold" t-out="pe.final_product_name"/>
                                         <td t-out="pe.raw_product_name"/>
-                                        <td t-out="pe.department"/>
+                                        <td t-out="this.t(pe.department)"/>
                                         <td t-out="pe.quantity"/>
                                         <td t-out="this.formatDH(pe.unit_cost)"/>
-                                        <td class="fw-bold" t-out="this.formatDH(pe.total_cost)"/>
-                                        <td>
-                                            <button class="btn btn-sm btn-link text-danger p-0" t-on-click="() => this.deleteRecord('all_in_one.purchase.entry', pe.id)">
+                                        <td class="fw-semibold" t-out="this.formatDH(pe.total_cost)"/>
+                                        <td class="text-end">
+                                            <button type="button" class="btn btn-sm btn-link text-danger p-0" t-on-click="() => this.deleteRecord('all_in_one.purchase.entry', pe.id)">
                                                 <i class="oi" data-icon="delete"/>
                                             </button>
                                         </td>
@@ -529,79 +543,72 @@
                         </div>
                     </div>
 
-                    <!-- ================= TAB 6: PASTRY POS & SMART RECONCILIATION ================= -->
-                    <div t-if="this.state.activeTab === 'pastry'" class="d-flex flex-column gap-4">
+                    <!-- ================= 6. PASTRY & RECONCILIATION ================= -->
+                    <div t-if="this.state.activeTab === 'pastry'" class="d-flex flex-column gap-3">
                         <div class="row g-3">
-                            <div class="col-md-3">
-                                <div class="card aio-kpi-card p-3">
-                                    <small class="text-muted fw-bold">قيمة إنتاج الباتيسري</small>
-                                    <h4 class="fw-bold text-primary m-0 mt-1" t-out="this.formatDH(this.state.data.kpis.pastry.production_value)"/>
+                            <div class="col-6 col-md-3">
+                                <div class="aio-kpi">
+                                    <div class="aio-kpi-label" t-out="this.t('pastry_prod_val')"/>
+                                    <div class="aio-kpi-value" t-out="this.formatDH(this.state.data.kpis.pastry.production_value)"/>
                                 </div>
                             </div>
-                            <div class="col-md-3">
-                                <div class="card aio-kpi-card kpi-green p-3">
-                                    <small class="text-muted fw-bold">مبيعات كاشير الباتيسري</small>
-                                    <h4 class="fw-bold text-success m-0 mt-1" t-out="this.formatDH(this.state.data.kpis.pastry.sales)"/>
+                            <div class="col-6 col-md-3">
+                                <div class="aio-kpi">
+                                    <div class="aio-kpi-label" t-out="this.t('pastry_sales')"/>
+                                    <div class="aio-kpi-value text-success" t-out="this.formatDH(this.state.data.kpis.pastry.sales)"/>
                                 </div>
                             </div>
-                            <div class="col-md-3">
-                                <div class="card aio-kpi-card kpi-orange p-3">
-                                    <small class="text-muted fw-bold">مصاريف + خسائر + سلعة الباتيسري</small>
-                                    <h4 class="fw-bold text-danger m-0 mt-1"
-                                        t-out="this.formatDH(this.state.data.kpis.pastry.expenses + this.state.data.kpis.pastry.losses + this.state.data.kpis.pastry.purchases)"/>
+                            <div class="col-6 col-md-3">
+                                <div class="aio-kpi">
+                                    <div class="aio-kpi-label" t-out="this.t('pastry_costs')"/>
+                                    <div class="aio-kpi-value text-danger" t-out="this.formatDH(this.state.data.kpis.pastry.expenses + this.state.data.kpis.pastry.losses + this.state.data.kpis.pastry.purchases)"/>
                                 </div>
                             </div>
-                            <div class="col-md-3">
-                                <div class="card aio-kpi-card kpi-purple p-3">
-                                    <small class="text-muted fw-bold">صافي ربح الباتيسري</small>
-                                    <h4 t-att-class="'fw-bold m-0 mt-1 ' + (this.state.data.kpis.pastry.net_profit &lt; 0 ? 'text-danger' : 'text-success')"
-                                        t-out="this.formatDH(this.state.data.kpis.pastry.net_profit)"/>
+                            <div class="col-6 col-md-3">
+                                <div class="aio-kpi">
+                                    <div class="aio-kpi-label" t-out="this.t('pastry_net')"/>
+                                    <div t-att-class="'aio-kpi-value ' + (this.state.data.kpis.pastry.net_profit &lt; 0 ? 'text-danger' : 'text-success')"
+                                         t-out="this.formatDH(this.state.data.kpis.pastry.net_profit)"/>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Smart End-of-Day Price-Tier Reconciliation Table -->
-                        <div class="card shadow-sm">
-                            <div class="card-header bg-white fw-bold">
-                                جدول تسوية المخزون الذكي نهاية اليوم حسب فئات الأسعار (0.5 DH, 1 DH, 2 DH, 3 DH...)
-                            </div>
-                            <div class="card-body p-0">
-                                <table class="table table-bordered align-middle mb-0">
-                                    <thead class="table-light">
+                        <div class="aio-card p-3">
+                            <h6 class="fw-semibold mb-3" t-out="this.t('reconcile_title')"/>
+                            <div class="border rounded overflow-hidden">
+                                <table class="table aio-table align-middle">
+                                    <thead>
                                         <tr>
-                                            <th style="width: 18%;">1. فئة السعر والكمية المباعة بالكاشير</th>
-                                            <th style="width: 48%;">2. المنتجات الفعلية والتوزيع التلقائي (الأولوية ثم الأكبر مخزوناً، يُمنع الخصم من مخزون ≤ 0)</th>
-                                            <th style="width: 16%;">3. المقارنة والفارق</th>
-                                            <th style="width: 18%;">4. الإجراءات</th>
+                                            <th style="width: 17%;" t-out="this.t('col_tier')"/>
+                                            <th style="width: 51%;" t-out="this.t('col_products')"/>
+                                            <th style="width: 15%;" t-out="this.t('col_diff')"/>
+                                            <th style="width: 17%;" t-out="this.t('col_actions')"/>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr t-foreach="this.state.data.reconciliation_tiers" t-as="tier" t-key="tier.price_tier">
-                                            <!-- Column 1 -->
-                                            <td class="text-center">
-                                                <span class="badge bg-primary aio-price-badge mb-2">
-                                                    فئة <t t-out="tier.price_tier"/> DH
+                                            <td>
+                                                <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-1 mb-1">
+                                                    <t t-out="this.t('tier_label')"/> <t t-out="tier.price_tier"/> DH
                                                 </span>
-                                                <div class="mt-1">المباع بالكاشير: <strong class="fs-5" t-out="tier.sold_qty"/></div>
-                                                <div class="small text-muted">المنتج: <t t-out="tier.produced_qty"/> (<t t-out="this.formatDH(tier.produced_value)"/>)</div>
+                                                <div class="small"><t t-out="this.t('sold_pos')"/>: <strong t-out="tier.sold_qty"/></div>
+                                                <div class="small text-muted"><t t-out="this.t('produced')"/>: <t t-out="tier.produced_qty"/></div>
                                             </td>
-
-                                            <!-- Column 2 -->
                                             <td>
                                                 <table class="table table-sm mb-0">
                                                     <thead>
                                                         <tr>
-                                                            <th>المنتج</th>
-                                                            <th>الأولوية</th>
-                                                            <th>المخزون الحالي</th>
-                                                            <th style="width: 130px;">الكمية المخصومة</th>
+                                                            <th t-out="this.t('product')"/>
+                                                            <th t-out="this.t('priority')"/>
+                                                            <th t-out="this.t('stock')"/>
+                                                            <th style="width: 110px;" t-out="this.t('deduct_qty')"/>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         <tr t-foreach="tier.products" t-as="prod" t-key="prod.product_id"
-                                                            t-att-class="{'table-secondary text-muted': prod.qty_available &lt;= 0}">
+                                                            t-att-class="{'text-muted': prod.qty_available &lt;= 0}">
                                                             <td t-out="prod.name"/>
-                                                            <td><span class="badge bg-light text-dark border" t-out="prod.priority"/></td>
+                                                            <td t-out="prod.priority"/>
                                                             <td>
                                                                 <strong t-att-class="prod.qty_available &lt;= 0 ? 'text-danger' : 'text-success'"
                                                                         t-out="prod.qty_available"/>
@@ -609,7 +616,7 @@
                                                             <td>
                                                                 <input type="number" step="1" min="0"
                                                                        t-att-max="prod.qty_available &gt; 0 ? prod.qty_available : 0"
-                                                                       class="form-control form-control-sm fw-bold"
+                                                                       class="form-control form-control-sm"
                                                                        t-att-disabled="prod.qty_available &lt;= 0 or (tier.state === 'approved' and !tier.editing)"
                                                                        t-att-value="prod.allocated_qty"
                                                                        t-on-change="(ev) => this.onAllocationEdit(tier, prod, ev)"/>
@@ -618,44 +625,25 @@
                                                     </tbody>
                                                 </table>
                                             </td>
-
-                                            <!-- Column 3 -->
                                             <td class="text-center">
-                                                <div>المباع: <strong t-out="tier.sold_qty"/></div>
-                                                <div>الموزع: <strong class="text-primary" t-out="tier.allocated_total"/></div>
-                                                <div class="mt-1">
-                                                    الفارق:
-                                                    <span t-att-class="'badge ' + (tier.difference === 0 ? 'bg-success' : 'bg-danger')"
-                                                          t-out="tier.difference"/>
-                                                </div>
+                                                <div class="small"><t t-out="this.t('sold_pos')"/>: <strong t-out="tier.sold_qty"/></div>
+                                                <div class="small"><t t-out="this.t('allocated')"/>: <strong t-out="tier.allocated_total"/></div>
+                                                <span t-att-class="'badge rounded-pill mt-1 ' + (tier.difference === 0 ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger')">
+                                                    <t t-out="this.t('diff')"/>: <t t-out="tier.difference"/>
+                                                </span>
                                             </td>
-
-                                            <!-- Column 4 -->
-                                            <td class="text-center">
+                                            <td>
                                                 <t t-if="tier.state === 'approved' and !tier.editing">
-                                                    <div class="mb-2">
-                                                        <span class="badge bg-success">تمت الموافقة وخصم المخزون</span>
+                                                    <div class="text-center mb-2">
+                                                        <span class="badge bg-success-subtle text-success rounded-pill" t-out="this.t('approved_badge')"/>
                                                     </div>
-                                                    <button class="btn btn-sm btn-outline-primary w-100"
-                                                            t-on-click="() => this.enableEditReconcileTier(tier)">
-                                                        <i class="oi me-1" data-icon="edit"/>تعديل
-                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary w-100" t-on-click="() => this.enableEditReconcileTier(tier)" t-out="this.t('edit')"/>
                                                 </t>
                                                 <t t-else="">
                                                     <div class="d-flex flex-column gap-1">
-                                                        <button class="btn btn-sm btn-success"
-                                                                t-on-click="() => this.approveReconcileTier(tier)">
-                                                            <i class="oi me-1" data-icon="check"/>موافقة
-                                                        </button>
-                                                        <button t-if="!tier.editing"
-                                                                class="btn btn-sm btn-outline-secondary"
-                                                                t-on-click="() => this.enableEditReconcileTier(tier)">
-                                                            <i class="oi me-1" data-icon="edit"/>تعديل
-                                                        </button>
-                                                        <button class="btn btn-sm btn-outline-danger"
-                                                                t-on-click="() => this.rejectReconcileTier(tier)">
-                                                            <i class="oi me-1" data-icon="close"/>رفض
-                                                        </button>
+                                                        <button type="button" class="btn btn-sm btn-success" t-on-click="() => this.approveReconcileTier(tier)" t-out="this.t('approve')"/>
+                                                        <button type="button" t-if="!tier.editing" class="btn btn-sm btn-outline-secondary" t-on-click="() => this.enableEditReconcileTier(tier)" t-out="this.t('edit')"/>
+                                                        <button type="button" class="btn btn-sm btn-outline-danger" t-on-click="() => this.rejectReconcileTier(tier)" t-out="this.t('reject')"/>
                                                     </div>
                                                 </t>
                                             </td>
@@ -666,217 +654,570 @@
                         </div>
                     </div>
 
-                    <!-- ================= TAB 7: COFFEE POS ================= -->
-                    <div t-if="this.state.activeTab === 'coffee'" class="card shadow-sm p-4">
-                        <h5 class="fw-bold mb-4 text-success">ملخص مبيعات وأرباح قسم القهوة (Coffee POS)</h5>
-                        <div class="row g-3">
+                    <!-- ================= 7. COFFEE ================= -->
+                    <div t-if="this.state.activeTab === 'coffee'" class="aio-card p-4">
+                        <h6 class="fw-semibold mb-3" t-out="this.t('coffee_title')"/>
+                        <div class="row g-3 mb-4">
                             <div class="col-md-4">
-                                <div class="card aio-kpi-card kpi-green p-3">
-                                    <small class="text-muted fw-bold">إجمالي مبيعات كاشير القهوة</small>
-                                    <h3 class="fw-bold text-success mt-2" t-out="this.formatDH(this.state.data.kpis.coffee.sales)"/>
+                                <div class="aio-kpi">
+                                    <div class="aio-kpi-label" t-out="this.t('coffee_sales')"/>
+                                    <div class="aio-kpi-value text-success" t-out="this.formatDH(this.state.data.kpis.coffee.sales)"/>
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <div class="card aio-kpi-card kpi-orange p-3">
-                                    <small class="text-muted fw-bold">مصاريف القهوة + حصتها من المشترك</small>
-                                    <h3 class="fw-bold text-warning mt-2" t-out="this.formatDH(this.state.data.kpis.coffee.expenses)"/>
+                                <div class="aio-kpi">
+                                    <div class="aio-kpi-label" t-out="this.t('coffee_expenses')"/>
+                                    <div class="aio-kpi-value" t-out="this.formatDH(this.state.data.kpis.coffee.expenses)"/>
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <div class="card aio-kpi-card kpi-red p-3">
-                                    <small class="text-muted fw-bold">خسائر القهوة + تكلفة السلعة</small>
-                                    <h3 class="fw-bold text-danger mt-2"
-                                        t-out="this.formatDH(this.state.data.kpis.coffee.losses + this.state.data.kpis.coffee.purchases)"/>
+                                <div class="aio-kpi">
+                                    <div class="aio-kpi-label" t-out="this.t('coffee_losses_purch')"/>
+                                    <div class="aio-kpi-value text-danger" t-out="this.formatDH(this.state.data.kpis.coffee.losses + this.state.data.kpis.coffee.purchases)"/>
                                 </div>
                             </div>
                         </div>
-
-                        <div class="alert alert-success mt-4 d-flex justify-content-between align-items-center">
-                            <span class="fs-5 fw-bold">صافي ربح القهوة (Net Profit) للفترة المحددة:</span>
-                            <span class="fs-3 fw-bolder" t-out="this.formatDH(this.state.data.kpis.coffee.net_profit)"/>
+                        <div class="p-3 rounded-3 bg-light border d-flex justify-content-between align-items-center">
+                            <span class="fw-semibold" t-out="this.t('coffee_net')"/>
+                            <span t-att-class="'fs-4 fw-bold ' + (this.state.data.kpis.coffee.net_profit &lt; 0 ? 'text-danger' : 'text-success')"
+                                  t-out="this.formatDH(this.state.data.kpis.coffee.net_profit)"/>
                         </div>
                     </div>
 
-                    <!-- ================= TAB 8: ACCOUNTING & AI INSIGHTS ================= -->
-                    <div t-if="this.state.activeTab === 'accounting_ai'" class="row g-4">
+                    <!-- ================= 8. ACCOUNTING & AI ================= -->
+                    <div t-if="this.state.activeTab === 'accounting_ai'" class="row g-3">
                         <div class="col-lg-6">
-                            <div class="card shadow-sm h-100">
-                                <div class="card-header bg-white fw-bold">تفصيل معادلات حساب الأرباح الإجمالية والصافية</div>
-                                <div class="card-body">
-                                    <h6 class="fw-bold text-primary">1. معادلة صافي ربح الباتيسري:</h6>
-                                    <p class="small text-muted mb-1">
-                                        صافي ربح الباتيسري = مبيعات الباتيسري - (مصاريف الباتيسري وحصته من المشترك) - خسائر الباتيسري - تكلفة السلعة
-                                    </p>
-                                    <div class="p-2 bg-light rounded border mb-3 dir-ltr text-start font-monospace">
+                            <div class="aio-card p-3 h-100">
+                                <h6 class="fw-semibold mb-3" t-out="this.t('equations_title')"/>
+
+                                <div class="mb-3">
+                                    <div class="small text-muted mb-1" t-out="this.t('pastry_eq')"/>
+                                    <div class="p-2 bg-light rounded border font-monospace small" dir="ltr">
                                         <t t-out="this.formatDH(this.state.data.kpis.pastry.sales)"/>
-                                        - <t t-out="this.formatDH(this.state.data.kpis.pastry.expenses)"/>
-                                        - <t t-out="this.formatDH(this.state.data.kpis.pastry.losses)"/>
-                                        - <t t-out="this.formatDH(this.state.data.kpis.pastry.purchases)"/>
+                                        − <t t-out="this.formatDH(this.state.data.kpis.pastry.expenses)"/>
+                                        − <t t-out="this.formatDH(this.state.data.kpis.pastry.losses)"/>
+                                        − <t t-out="this.formatDH(this.state.data.kpis.pastry.purchases)"/>
                                         = <strong class="text-primary" t-out="this.formatDH(this.state.data.kpis.pastry.net_profit)"/>
                                     </div>
+                                </div>
 
-                                    <h6 class="fw-bold text-success">2. معادلة صافي ربح القهوة:</h6>
-                                    <p class="small text-muted mb-1">
-                                        صافي ربح القهوة = مبيعات القهوة - (مصاريف القهوة وحصتها من المشترك) - خسائر القهوة - تكلفة السلعة
-                                    </p>
-                                    <div class="p-2 bg-light rounded border mb-3 dir-ltr text-start font-monospace">
+                                <div class="mb-3">
+                                    <div class="small text-muted mb-1" t-out="this.t('coffee_eq')"/>
+                                    <div class="p-2 bg-light rounded border font-monospace small" dir="ltr">
                                         <t t-out="this.formatDH(this.state.data.kpis.coffee.sales)"/>
-                                        - <t t-out="this.formatDH(this.state.data.kpis.coffee.expenses)"/>
-                                        - <t t-out="this.formatDH(this.state.data.kpis.coffee.losses)"/>
-                                        - <t t-out="this.formatDH(this.state.data.kpis.coffee.purchases)"/>
+                                        − <t t-out="this.formatDH(this.state.data.kpis.coffee.expenses)"/>
+                                        − <t t-out="this.formatDH(this.state.data.kpis.coffee.losses)"/>
+                                        − <t t-out="this.formatDH(this.state.data.kpis.coffee.purchases)"/>
                                         = <strong class="text-success" t-out="this.formatDH(this.state.data.kpis.coffee.net_profit)"/>
                                     </div>
+                                </div>
 
-                                    <h6 class="fw-bold text-dark">3. صافي ربح المشروع الكلي:</h6>
-                                    <div class="p-3 bg-dark text-white rounded d-flex justify-content-between align-items-center">
-                                        <span>إجمالي صافي الربح (الباتيسري + القهوة):</span>
-                                        <strong class="fs-4 text-warning" t-out="this.formatDH(this.state.data.kpis.total_net_profit)"/>
-                                    </div>
+                                <div class="p-3 bg-dark text-white rounded-3 d-flex justify-content-between align-items-center">
+                                    <span t-out="this.t('total_eq')"/>
+                                    <strong class="fs-5 text-warning" t-out="this.formatDH(this.state.data.kpis.total_net_profit)"/>
                                 </div>
                             </div>
                         </div>
 
                         <div class="col-lg-6">
-                            <div class="card shadow-sm h-100">
-                                <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                                    <span class="fw-bold text-purple">المساعد الذكي (Google Gemini / OpenRouter AI)</span>
-                                    <span class="badge bg-secondary" t-out="this.state.data.settings.ai_provider"/>
+                            <div class="aio-card p-3 h-100 d-flex flex-column gap-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="fw-semibold m-0" t-out="this.t('ai_title')"/>
+                                    <span class="badge bg-light text-secondary border" t-out="this.state.data.settings.ai_provider"/>
                                 </div>
-                                <div class="card-body d-flex flex-column gap-3">
-                                    <div class="d-flex flex-wrap gap-2">
-                                        <button class="btn btn-sm btn-outline-primary"
-                                                t-on-click="() => this.askAi('حلل أسباب الفارق بين الإنتاج والمبيعات في الباتيسري واقترح حلولاً لتقليل الخسائر.')">
-                                            تحليل فوارق الباتيسري والخسائر
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-success"
-                                                t-on-click="() => this.askAi('قارن بين ربحية قسم الباتيسري وقسم القهوة واقترح خطة لرفع صافي الربح بنسبة 15%.')">
-                                            مقارنة الباتيسري والقهوة وزيادة الربح
+
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" t-on-click="() => this.askAi(this.t('ai_prompt_1'))" t-out="this.t('ai_btn_1')"/>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" t-on-click="() => this.askAi(this.t('ai_prompt_2'))" t-out="this.t('ai_btn_2')"/>
+                                </div>
+
+                                <textarea class="form-control form-control-sm" rows="3"
+                                          t-att-placeholder="this.t('ai_placeholder')"
+                                          t-att-value="this.state.aiPrompt"
+                                          t-on-input="(ev) => this.updateField(this.state, 'aiPrompt', ev)"/>
+
+                                <button type="button" class="btn btn-primary btn-sm align-self-start"
+                                        t-att-disabled="this.state.aiLoading"
+                                        t-on-click="() => this.askAi()"
+                                        t-out="this.state.aiLoading ? this.t('ai_thinking') : this.t('ai_send')"/>
+
+                                <div t-if="this.state.aiResponse" class="aio-ai-response" t-out="this.state.aiResponse"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ================= 9. AUTOMATIONS (n8n-STYLE BUILDER) ================= -->
+                    <div t-if="this.state.activeTab === 'automations'" class="row g-3">
+                        <!-- Left Sidebar: Workflows & Starter Templates -->
+                        <div class="col-lg-4 d-flex flex-column gap-3">
+                            <div class="aio-card p-3">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="fw-semibold" t-out="this.t('auto_workflows')"/>
+                                    <button type="button" class="btn btn-sm btn-primary" t-on-click="() => this.createNewWorkflow('blank')">
+                                        <i class="oi me-1" data-icon="add"/><span t-out="this.t('auto_new')"/>
+                                    </button>
+                                </div>
+
+                                <div class="d-flex flex-column gap-2">
+                                    <div t-foreach="this.state.data.automations" t-as="wf" t-key="wf.id"
+                                         t-att-class="'aio-wf-item ' + (this.state.editingWorkflow?.id === wf.id ? 'selected' : '')"
+                                         t-on-click="() => this.selectWorkflow(wf)">
+                                        <div class="d-flex justify-content-between align-items-center gap-2">
+                                            <div class="d-flex align-items-center gap-2 text-truncate">
+                                                <span t-att-class="'aio-status-dot dot-' + wf.last_status"/>
+                                                <span class="fw-semibold small text-truncate" t-out="wf.name"/>
+                                            </div>
+                                            <div class="form-check form-switch m-0" t-on-click.stop="">
+                                                <input class="form-check-input" type="checkbox"
+                                                       t-att-checked="wf.active"
+                                                       t-on-change="() => this.toggleWorkflowActive(wf)"/>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center mt-1">
+                                            <span class="small text-muted">
+                                                <t t-out="wf.trigger_type"/>
+                                                <t t-if="wf.trigger_type === 'daily' or wf.trigger_type === 'weekly'"> · <t t-out="wf.schedule_time"/></t>
+                                                · <t t-out="wf.steps.length"/> nodes
+                                            </span>
+                                            <button type="button" class="btn btn-sm btn-link text-success p-0"
+                                                    t-on-click.stop="() => this.runWorkflowNow(wf)"
+                                                    t-att-title="this.t('auto_run_now')">
+                                                <i class="oi" data-icon="play_arrow"/>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 1-Click n8n-style Starter Templates -->
+                            <div class="aio-card p-3">
+                                <div class="small fw-semibold text-muted mb-2" t-out="this.t('auto_templates')"/>
+                                <div class="d-flex flex-column gap-2">
+                                    <button type="button" class="btn btn-sm btn-light border text-start d-flex align-items-center gap-2"
+                                            t-on-click="() => this.createNewWorkflow('reset_stock')">
+                                        <i class="oi text-primary" data-icon="restart_alt"/>
+                                        <span t-out="this.t('act_reset_qty')"/>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-light border text-start d-flex align-items-center gap-2"
+                                            t-on-click="() => this.createNewWorkflow('expired_eod')">
+                                        <i class="oi text-danger" data-icon="delete_sweep"/>
+                                        <span t-out="this.t('act_expired_loss')"/>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-light border text-start d-flex align-items-center gap-2"
+                                            t-on-click="() => this.createNewWorkflow('reconcile_close')">
+                                        <i class="oi text-success" data-icon="fact_check"/>
+                                        <span t-out="this.t('act_reconcile')"/>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-light border text-start d-flex align-items-center gap-2"
+                                            t-on-click="() => this.createNewWorkflow('morning_stock')">
+                                        <i class="oi text-warning" data-icon="inventory_2"/>
+                                        <span t-out="this.t('act_toggle_storable')"/>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Panel: Visual Workflow Canvas & Execution History -->
+                        <div class="col-lg-8 d-flex flex-column gap-3">
+                            <t t-if="!this.state.editingWorkflow">
+                                <div class="aio-card p-5 text-center text-muted">
+                                    <i class="oi fs-1 mb-2 d-block opacity-50" data-icon="bolt"/>
+                                    <div t-out="this.t('auto_select_hint')"/>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <t t-set="ewf" t-value="this.state.editingWorkflow"/>
+                                <!-- Workflow Toolbar -->
+                                <div class="aio-card p-3">
+                                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                                        <input type="text" class="form-control form-control-sm fw-semibold" style="max-width: 340px;"
+                                               t-att-placeholder="this.t('auto_workflow_name')"
+                                               t-att-value="ewf.name"
+                                               t-on-input="(ev) => this.updateField(ewf, 'name', ev)"/>
+
+                                        <div class="d-flex align-items-center gap-2">
+                                            <button type="button" class="btn btn-sm btn-success"
+                                                    t-att-disabled="this.state.runningWorkflow"
+                                                    t-on-click="() => this.runWorkflowNow()">
+                                                <i class="oi me-1" data-icon="play_arrow"/>
+                                                <t t-out="this.state.runningWorkflow ? this.t('auto_running') : this.t('auto_run_now')"/>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-primary" t-on-click="() => this.saveWorkflow()" t-out="this.t('save')"/>
+                                            <button t-if="ewf.id" type="button" class="btn btn-sm btn-outline-danger" t-on-click="() => this.deleteWorkflow(ewf.id)" t-out="this.t('auto_delete')"/>
+                                        </div>
+                                    </div>
+
+                                    <!-- Dotted n8n-Style Visual Node Flow -->
+                                    <div class="aio-canvas d-flex flex-column align-items-center">
+                                        <!-- TRIGGER NODE -->
+                                        <div class="aio-node node-trigger p-3">
+                                            <div class="d-flex align-items-center gap-2 mb-2">
+                                                <i class="oi text-primary" data-icon="schedule"/>
+                                                <span class="fw-semibold small text-uppercase text-primary" t-out="this.t('auto_trigger_node')"/>
+                                            </div>
+                                            <div class="row g-2">
+                                                <div class="col-md-5">
+                                                    <select class="form-select form-select-sm"
+                                                            t-on-change="(ev) => this.updateField(ewf, 'trigger_type', ev)">
+                                                        <option value="manual" t-att-selected="ewf.trigger_type === 'manual'" t-out="this.t('trig_manual')"/>
+                                                        <option value="daily" t-att-selected="ewf.trigger_type === 'daily'" t-out="this.t('trig_daily')"/>
+                                                        <option value="weekly" t-att-selected="ewf.trigger_type === 'weekly'" t-out="this.t('trig_weekly')"/>
+                                                        <option value="interval" t-att-selected="ewf.trigger_type === 'interval'" t-out="this.t('trig_interval')"/>
+                                                    </select>
+                                                </div>
+                                                <div t-if="ewf.trigger_type === 'daily' or ewf.trigger_type === 'weekly'" class="col-md-3">
+                                                    <input type="time" class="form-control form-control-sm"
+                                                           t-att-value="ewf.schedule_time"
+                                                           t-on-change="(ev) => this.updateField(ewf, 'schedule_time', ev)"/>
+                                                </div>
+                                                <div t-if="ewf.trigger_type === 'weekly'" class="col-md-4">
+                                                    <select class="form-select form-select-sm"
+                                                            t-on-change="(ev) => this.updateField(ewf, 'schedule_weekday', ev)">
+                                                        <option value="0" t-att-selected="ewf.schedule_weekday === '0'">Monday</option>
+                                                        <option value="1" t-att-selected="ewf.schedule_weekday === '1'">Tuesday</option>
+                                                        <option value="2" t-att-selected="ewf.schedule_weekday === '2'">Wednesday</option>
+                                                        <option value="3" t-att-selected="ewf.schedule_weekday === '3'">Thursday</option>
+                                                        <option value="4" t-att-selected="ewf.schedule_weekday === '4'">Friday</option>
+                                                        <option value="5" t-att-selected="ewf.schedule_weekday === '5'">Saturday</option>
+                                                        <option value="6" t-att-selected="ewf.schedule_weekday === '6'">Sunday</option>
+                                                    </select>
+                                                </div>
+                                                <div t-if="ewf.trigger_type === 'interval'" class="col-md-4">
+                                                    <input type="number" min="1" class="form-control form-control-sm"
+                                                           t-att-placeholder="this.t('every_hours')"
+                                                           t-att-value="ewf.interval_hours"
+                                                           t-on-input="(ev) => this.updateField(ewf, 'interval_hours', ev, true)"/>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- ACTION NODES CHAIN -->
+                                        <t t-foreach="ewf.steps" t-as="step" t-key="step.id">
+                                            <div class="aio-node-connector">
+                                                <i class="oi small" data-icon="arrow_downward"/>
+                                            </div>
+                                            <div class="aio-node node-action p-3">
+                                                <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                                                    <div class="d-flex align-items-center gap-2 flex-grow-1">
+                                                        <i class="oi text-success" t-att-data-icon="this.getStepIcon(step.type)"/>
+                                                        <select class="form-select form-select-sm fw-semibold"
+                                                                t-on-change="(ev) => this.changeStepType(step, ev)">
+                                                            <option value="reset_product_qty" t-att-selected="step.type === 'reset_product_qty'" t-out="this.t('act_reset_qty')"/>
+                                                            <option value="record_expired_loss" t-att-selected="step.type === 'record_expired_loss'" t-out="this.t('act_expired_loss')"/>
+                                                            <option value="toggle_tracked_storable" t-att-selected="step.type === 'toggle_tracked_storable'" t-out="this.t('act_toggle_storable')"/>
+                                                            <option value="auto_approve_reconcile" t-att-selected="step.type === 'auto_approve_reconcile'" t-out="this.t('act_reconcile')"/>
+                                                            <option value="create_expense" t-att-selected="step.type === 'create_expense'" t-out="this.t('act_expense')"/>
+                                                            <option value="adjust_prices" t-att-selected="step.type === 'adjust_prices'" t-out="this.t('act_prices')"/>
+                                                            <option value="kpi_snapshot" t-att-selected="step.type === 'kpi_snapshot'" t-out="this.t('act_kpi')"/>
+                                                            <option value="webhook_http" t-att-selected="step.type === 'webhook_http'" t-out="this.t('act_webhook')"/>
+                                                        </select>
+                                                    </div>
+                                                    <div class="d-flex align-items-center gap-1">
+                                                        <button type="button" class="btn btn-sm btn-light border py-0 px-1" t-on-click="() => this.moveActionNode(step_index, -1)">
+                                                            <i class="oi small" data-icon="arrow_upward"/>
+                                                        </button>
+                                                        <button type="button" class="btn btn-sm btn-light border py-0 px-1" t-on-click="() => this.moveActionNode(step_index, 1)">
+                                                            <i class="oi small" data-icon="arrow_downward"/>
+                                                        </button>
+                                                        <button type="button" class="btn btn-sm btn-light border text-danger py-0 px-1" t-on-click="() => this.removeActionNode(step_index)">
+                                                            <i class="oi small" data-icon="close"/>
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Node Config: reset_product_qty -->
+                                                <div t-if="step.type === 'reset_product_qty'" class="row g-2">
+                                                    <div class="col-md-5">
+                                                        <label class="small text-muted" t-out="this.t('scope')"/>
+                                                        <select class="form-select form-select-sm"
+                                                                t-on-change="(ev) => this.updateField(step.config, 'scope', ev)">
+                                                            <option value="all_storable" t-att-selected="step.config.scope === 'all_storable'" t-out="this.t('scope_all')"/>
+                                                            <option value="tracked_card" t-att-selected="step.config.scope === 'tracked_card'" t-out="this.t('scope_tracked')"/>
+                                                            <option value="pos_category" t-att-selected="step.config.scope === 'pos_category'" t-out="this.t('scope_categ')"/>
+                                                        </select>
+                                                    </div>
+                                                    <div t-if="step.config.scope === 'pos_category'" class="col-md-4">
+                                                        <label class="small text-muted" t-out="this.t('category')"/>
+                                                        <select class="form-select form-select-sm"
+                                                                t-on-change="(ev) => this.updateField(step.config, 'pos_categ_id', ev)">
+                                                            <option value="" t-att-selected="!step.config.pos_categ_id">--</option>
+                                                            <t t-foreach="this.state.data.pos_categories" t-as="cat" t-key="cat.id">
+                                                                <option t-att-value="cat.id" t-att-selected="step.config.pos_categ_id == cat.id" t-out="cat.name"/>
+                                                            </t>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <label class="small text-muted" t-out="this.t('target_qty')"/>
+                                                        <input type="number" step="1" class="form-control form-control-sm"
+                                                               t-att-value="step.config.target_qty"
+                                                               t-on-input="(ev) => this.updateField(step.config, 'target_qty', ev, true)"/>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Node Config: record_expired_loss -->
+                                                <div t-if="step.type === 'record_expired_loss'" class="row g-2">
+                                                    <div class="col-md-4">
+                                                        <label class="small text-muted" t-out="this.t('scope')"/>
+                                                        <select class="form-select form-select-sm"
+                                                                t-on-change="(ev) => this.updateField(step.config, 'scope', ev)">
+                                                            <option value="tracked_card" t-att-selected="step.config.scope === 'tracked_card'" t-out="this.t('scope_tracked')"/>
+                                                            <option value="pos_category" t-att-selected="step.config.scope === 'pos_category'" t-out="this.t('scope_categ')"/>
+                                                            <option value="all_storable" t-att-selected="step.config.scope === 'all_storable'" t-out="this.t('scope_all')"/>
+                                                        </select>
+                                                    </div>
+                                                    <div t-if="step.config.scope === 'pos_category'" class="col-md-4">
+                                                        <label class="small text-muted" t-out="this.t('category')"/>
+                                                        <select class="form-select form-select-sm"
+                                                                t-on-change="(ev) => this.updateField(step.config, 'pos_categ_id', ev)">
+                                                            <option value="" t-att-selected="!step.config.pos_categ_id">--</option>
+                                                            <t t-foreach="this.state.data.pos_categories" t-as="cat" t-key="cat.id">
+                                                                <option t-att-value="cat.id" t-att-selected="step.config.pos_categ_id == cat.id" t-out="cat.name"/>
+                                                            </t>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="small text-muted" t-out="this.t('department')"/>
+                                                        <select class="form-select form-select-sm"
+                                                                t-on-change="(ev) => this.updateField(step.config, 'department', ev)">
+                                                            <option value="pastry" t-att-selected="step.config.department === 'pastry'" t-out="this.t('pastry')"/>
+                                                            <option value="coffee" t-att-selected="step.config.department === 'coffee'" t-out="this.t('coffee')"/>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Node Config: toggle_tracked_storable -->
+                                                <div t-if="step.type === 'toggle_tracked_storable'" class="row g-2">
+                                                    <div class="col-md-6">
+                                                        <label class="small text-muted" t-out="this.t('storable_action')"/>
+                                                        <select class="form-select form-select-sm"
+                                                                t-on-change="(ev) => this.updateField(step.config, 'enable', ev)">
+                                                            <option value="true" t-att-selected="step.config.enable === 'true'" t-out="this.t('turn_on')"/>
+                                                            <option value="false" t-att-selected="step.config.enable === 'false'" t-out="this.t('turn_off')"/>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Node Config: create_expense -->
+                                                <div t-if="step.type === 'create_expense'" class="row g-2">
+                                                    <div class="col-md-4">
+                                                        <label class="small text-muted" t-out="this.t('description')"/>
+                                                        <input type="text" class="form-control form-control-sm"
+                                                               t-att-value="step.config.expense_name"
+                                                               t-on-input="(ev) => this.updateField(step.config, 'expense_name', ev)"/>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="small text-muted" t-out="this.t('department')"/>
+                                                        <select class="form-select form-select-sm"
+                                                                t-on-change="(ev) => this.updateField(step.config, 'department', ev)">
+                                                            <option value="pastry" t-att-selected="step.config.department === 'pastry'" t-out="this.t('pastry')"/>
+                                                            <option value="coffee" t-att-selected="step.config.department === 'coffee'" t-out="this.t('coffee')"/>
+                                                            <option value="shared" t-att-selected="step.config.department === 'shared'" t-out="this.t('shared')"/>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="small text-muted" t-out="this.t('amount')"/>
+                                                        <input type="number" step="0.01" class="form-control form-control-sm"
+                                                               t-att-value="step.config.amount"
+                                                               t-on-input="(ev) => this.updateField(step.config, 'amount', ev, true)"/>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Node Config: adjust_prices -->
+                                                <div t-if="step.type === 'adjust_prices'" class="row g-2">
+                                                    <div class="col-md-4">
+                                                        <label class="small text-muted" t-out="this.t('category')"/>
+                                                        <select class="form-select form-select-sm"
+                                                                t-on-change="(ev) => this.updateField(step.config, 'pos_categ_id', ev)">
+                                                            <option value="" t-att-selected="!step.config.pos_categ_id" t-out="this.t('all_categories')"/>
+                                                            <t t-foreach="this.state.data.pos_categories" t-as="cat" t-key="cat.id">
+                                                                <option t-att-value="cat.id" t-att-selected="step.config.pos_categ_id == cat.id" t-out="cat.name"/>
+                                                            </t>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="small text-muted" t-out="this.t('price_mode')"/>
+                                                        <select class="form-select form-select-sm"
+                                                                t-on-change="(ev) => this.updateField(step.config, 'mode', ev)">
+                                                            <option value="percent" t-att-selected="step.config.mode === 'percent'" t-out="this.t('percent')"/>
+                                                            <option value="fixed" t-att-selected="step.config.mode === 'fixed'" t-out="this.t('fixed_dh')"/>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="small text-muted" t-out="this.t('value')"/>
+                                                        <input type="number" step="0.5" class="form-control form-control-sm"
+                                                               t-att-value="step.config.value"
+                                                               t-on-input="(ev) => this.updateField(step.config, 'value', ev, true)"/>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Node Config: webhook_http -->
+                                                <div t-if="step.type === 'webhook_http'" class="row g-2">
+                                                    <div class="col-md-8">
+                                                        <label class="small text-muted" t-out="this.t('webhook_url')"/>
+                                                        <input type="url" class="form-control form-control-sm" dir="ltr"
+                                                               placeholder="https://n8n.example.com/webhook/..."
+                                                               t-att-value="step.config.url"
+                                                               t-on-input="(ev) => this.updateField(step.config, 'url', ev)"/>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="small text-muted" t-out="this.t('webhook_msg')"/>
+                                                        <input type="text" class="form-control form-control-sm"
+                                                               t-att-value="step.config.custom_message"
+                                                               t-on-input="(ev) => this.updateField(step.config, 'custom_message', ev)"/>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </t>
+
+                                        <!-- Add Step Button -->
+                                        <div class="aio-node-connector"/>
+                                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3"
+                                                t-on-click="() => this.addActionNode('reset_product_qty')">
+                                            <i class="oi me-1" data-icon="add"/><span t-out="this.t('auto_add_node')"/>
                                         </button>
                                     </div>
 
-                                    <textarea class="form-control" rows="3"
-                                              placeholder="اكتب سؤالك للمساعد الذكي حول الأرقام الحالية..."
-                                              t-att-value="this.state.aiPrompt"
-                                              t-on-input="(ev) => this.updateField(this.state, 'aiPrompt', ev)"/>
+                                    <!-- Live Execution Output -->
+                                    <div t-if="this.state.lastRunOutput" class="aio-run-output mt-3" dir="ltr" t-out="this.state.lastRunOutput"/>
+                                </div>
+                            </t>
 
-                                    <button class="btn btn-primary" t-att-disabled="this.state.aiLoading" t-on-click="() => this.askAi()">
-                                        <t t-if="this.state.aiLoading">جاري التحليل بواسطة الذكاء الاصطناعي...</t>
-                                        <t t-else="">إرسال وتحليل البيانات الحالية</t>
-                                    </button>
-
-                                    <div t-if="this.state.aiResponse" class="p-3 rounded border aio-ai-response"
-                                         t-out="this.state.aiResponse"/>
+                            <!-- Execution History Logs -->
+                            <div class="aio-card p-3">
+                                <h6 class="fw-semibold mb-2" t-out="this.t('auto_logs_title')"/>
+                                <t t-if="!this.state.data.automation_logs.length">
+                                    <div class="small text-muted" t-out="this.t('auto_no_logs')"/>
+                                </t>
+                                <div t-else="" class="border rounded overflow-hidden">
+                                    <table class="table aio-table">
+                                        <thead>
+                                            <tr>
+                                                <th t-out="this.t('date')"/>
+                                                <th t-out="this.t('auto_workflows')"/>
+                                                <th t-out="this.t('status')"/>
+                                                <th t-out="this.t('description')"/>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr t-foreach="this.state.data.automation_logs" t-as="lg" t-key="lg.id">
+                                                <td class="text-nowrap small text-muted" t-out="lg.date"/>
+                                                <td class="fw-medium" t-out="lg.automation_name"/>
+                                                <td>
+                                                    <span t-att-class="'badge rounded-pill ' + (lg.status === 'success' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger')"
+                                                          t-out="lg.status"/>
+                                                </td>
+                                                <td class="small" style="white-space: pre-line;" t-out="lg.details"/>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- ================= SETTINGS TAB (CONFIGURATION) ================= -->
-                    <div t-if="this.state.activeTab === 'settings'" class="card shadow-sm">
-                        <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                            <span class="fw-bold">الإعدادات العامة للموديول (All In One Configuration)</span>
-                            <button class="btn btn-primary btn-sm" t-on-click="() => this.saveSettings()">
-                                حفظ الإعدادات
-                            </button>
+                    <!-- ================= 10. SETTINGS ================= -->
+                    <div t-if="this.state.activeTab === 'settings'" class="aio-card p-3">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="fw-semibold m-0" t-out="this.t('settings_title')"/>
+                            <button type="button" class="btn btn-primary btn-sm" t-on-click="() => this.saveSettings()" t-out="this.t('save_settings')"/>
                         </div>
-                        <div class="card-body">
-                            <div class="row g-4">
-                                <div class="col-md-4">
-                                    <h6 class="fw-bold text-primary">1. تصنيفات قسم الباتيسري</h6>
-                                    <div class="border rounded p-2 bg-light" style="max-height: 200px; overflow-y: auto;">
-                                        <t t-foreach="this.state.data.pos_categories" t-as="cat" t-key="cat.id">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox"
-                                                       t-att-checked="this.state.data.settings.pastry_categ_ids.includes(cat.id)"
-                                                       t-on-change="() => this.toggleSettingArrayItem('pastry_categ_ids', cat.id)"/>
-                                                <label class="form-check-label" t-out="cat.name"/>
-                                            </div>
-                                        </t>
+
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="small fw-semibold mb-2" t-out="this.t('set_pastry_cat')"/>
+                                <div class="border rounded p-2 bg-light" style="max-height: 190px; overflow-y: auto;">
+                                    <t t-foreach="this.state.data.pos_categories" t-as="cat" t-key="cat.id">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox"
+                                                   t-att-checked="this.state.data.settings.pastry_categ_ids.includes(cat.id)"
+                                                   t-on-change="() => this.toggleSettingArrayItem('pastry_categ_ids', cat.id)"/>
+                                            <label class="form-check-label small" t-out="cat.name"/>
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="small fw-semibold mb-2" t-out="this.t('set_coffee_cat')"/>
+                                <div class="border rounded p-2 bg-light" style="max-height: 190px; overflow-y: auto;">
+                                    <t t-foreach="this.state.data.pos_categories" t-as="cat" t-key="cat.id">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox"
+                                                   t-att-checked="this.state.data.settings.coffee_categ_ids.includes(cat.id)"
+                                                   t-on-change="() => this.toggleSettingArrayItem('coffee_categ_ids', cat.id)"/>
+                                            <label class="form-check-label small" t-out="cat.name"/>
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="small fw-semibold mb-2" t-out="this.t('set_prod_cat')"/>
+                                <div class="border rounded p-2 bg-light" style="max-height: 190px; overflow-y: auto;">
+                                    <t t-foreach="this.state.data.pos_categories" t-as="cat" t-key="cat.id">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox"
+                                                   t-att-checked="this.state.data.settings.production_categ_ids.includes(cat.id)"
+                                                   t-on-change="() => this.toggleSettingArrayItem('production_categ_ids', cat.id)"/>
+                                            <label class="form-check-label small" t-out="cat.name"/>
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="small fw-semibold mb-2" t-out="this.t('set_split')"/>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <label class="small text-muted" t-out="this.t('set_pastry_pct')"/>
+                                        <input type="number" step="1" min="0" max="100" class="form-control form-control-sm"
+                                               t-att-value="this.state.data.settings.shared_pastry_pct"
+                                               t-on-change="(ev) => this.onSharedPastryPctChange(ev)"/>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="small text-muted" t-out="this.t('set_coffee_pct')"/>
+                                        <input type="number" class="form-control form-control-sm" readonly="readonly"
+                                               t-att-value="this.state.data.settings.shared_coffee_pct"/>
                                     </div>
                                 </div>
+                            </div>
 
-                                <div class="col-md-4">
-                                    <h6 class="fw-bold text-success">2. تصنيفات قسم القهوة</h6>
-                                    <div class="border rounded p-2 bg-light" style="max-height: 200px; overflow-y: auto;">
-                                        <t t-foreach="this.state.data.pos_categories" t-as="cat" t-key="cat.id">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox"
-                                                       t-att-checked="this.state.data.settings.coffee_categ_ids.includes(cat.id)"
-                                                       t-on-change="() => this.toggleSettingArrayItem('coffee_categ_ids', cat.id)"/>
-                                                <label class="form-check-label" t-out="cat.name"/>
-                                            </div>
-                                        </t>
+                            <div class="col-md-6">
+                                <div class="small fw-semibold mb-2" t-out="this.t('set_ai')"/>
+                                <div class="mb-2">
+                                    <label class="small text-muted" t-out="this.t('active_provider')"/>
+                                    <select class="form-select form-select-sm"
+                                            t-on-change="(ev) => this.updateField(this.state.data.settings, 'ai_provider', ev)">
+                                        <option value="gemini" t-att-selected="this.state.data.settings.ai_provider === 'gemini'">Google Gemini</option>
+                                        <option value="openrouter" t-att-selected="this.state.data.settings.ai_provider === 'openrouter'">OpenRouter</option>
+                                    </select>
+                                </div>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-7">
+                                        <label class="small text-muted">Gemini API Key</label>
+                                        <input type="password" class="form-control form-control-sm" dir="ltr"
+                                               t-att-value="this.state.data.settings.gemini_api_key"
+                                               t-on-input="(ev) => this.updateField(this.state.data.settings, 'gemini_api_key', ev)"/>
+                                    </div>
+                                    <div class="col-5">
+                                        <label class="small text-muted">Gemini Model</label>
+                                        <input type="text" class="form-control form-control-sm" dir="ltr"
+                                               t-att-value="this.state.data.settings.gemini_model"
+                                               t-on-input="(ev) => this.updateField(this.state.data.settings, 'gemini_model', ev)"/>
                                     </div>
                                 </div>
-
-                                <div class="col-md-4">
-                                    <h6 class="fw-bold text-info">3. تصنيفات شاشة الإنتاج</h6>
-                                    <div class="border rounded p-2 bg-light" style="max-height: 200px; overflow-y: auto;">
-                                        <t t-foreach="this.state.data.pos_categories" t-as="cat" t-key="cat.id">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox"
-                                                       t-att-checked="this.state.data.settings.production_categ_ids.includes(cat.id)"
-                                                       t-on-change="() => this.toggleSettingArrayItem('production_categ_ids', cat.id)"/>
-                                                <label class="form-check-label" t-out="cat.name"/>
-                                            </div>
-                                        </t>
+                                <div class="row g-2">
+                                    <div class="col-7">
+                                        <label class="small text-muted">OpenRouter API Key</label>
+                                        <input type="password" class="form-control form-control-sm" dir="ltr"
+                                               t-att-value="this.state.data.settings.openrouter_api_key"
+                                               t-on-input="(ev) => this.updateField(this.state.data.settings, 'openrouter_api_key', ev)"/>
                                     </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <h6 class="fw-bold">4. نسبة توزيع المصاريف المشتركة (%)</h6>
-                                    <div class="row g-2">
-                                        <div class="col-6">
-                                            <label class="small">نسبة الباتيسري (%)</label>
-                                            <input type="number" step="1" min="0" max="100" class="form-control"
-                                                   t-att-value="this.state.data.settings.shared_pastry_pct"
-                                                   t-on-change="(ev) => this.onSharedPastryPctChange(ev)"/>
-                                        </div>
-                                        <div class="col-6">
-                                            <label class="small">نسبة القهوة (%)</label>
-                                            <input type="number" class="form-control" readonly="readonly"
-                                                   t-att-value="this.state.data.settings.shared_coffee_pct"/>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <h6 class="fw-bold">5. إعدادات الذكاء الاصطناعي (Google Gemini &amp; OpenRouter)</h6>
-                                    <div class="mb-2">
-                                        <label class="small fw-bold">المزود النشط</label>
-                                        <select class="form-select form-select-sm"
-                                                t-on-change="(ev) => this.updateField(this.state.data.settings, 'ai_provider', ev)">
-                                            <option value="gemini" t-att-selected="this.state.data.settings.ai_provider === 'gemini'">Google Gemini</option>
-                                            <option value="openrouter" t-att-selected="this.state.data.settings.ai_provider === 'openrouter'">OpenRouter</option>
-                                        </select>
-                                    </div>
-                                    <div class="row g-2 mb-2">
-                                        <div class="col-7">
-                                            <label class="small">Gemini API Key</label>
-                                            <input type="password" class="form-control form-control-sm"
-                                                   t-att-value="this.state.data.settings.gemini_api_key"
-                                                   t-on-input="(ev) => this.updateField(this.state.data.settings, 'gemini_api_key', ev)"/>
-                                        </div>
-                                        <div class="col-5">
-                                            <label class="small">Gemini Model</label>
-                                            <input type="text" class="form-control form-control-sm"
-                                                   t-att-value="this.state.data.settings.gemini_model"
-                                                   t-on-input="(ev) => this.updateField(this.state.data.settings, 'gemini_model', ev)"/>
-                                        </div>
-                                    </div>
-                                    <div class="row g-2">
-                                        <div class="col-7">
-                                            <label class="small">OpenRouter API Key</label>
-                                            <input type="password" class="form-control form-control-sm"
-                                                   t-att-value="this.state.data.settings.openrouter_api_key"
-                                                   t-on-input="(ev) => this.updateField(this.state.data.settings, 'openrouter_api_key', ev)"/>
-                                        </div>
-                                        <div class="col-5">
-                                            <label class="small">OpenRouter Model</label>
-                                            <input type="text" class="form-control form-control-sm"
-                                                   t-att-value="this.state.data.settings.openrouter_model"
-                                                   t-on-input="(ev) => this.updateField(this.state.data.settings, 'openrouter_model', ev)"/>
-                                        </div>
+                                    <div class="col-5">
+                                        <label class="small text-muted">OpenRouter Model</label>
+                                        <input type="text" class="form-control form-control-sm" dir="ltr"
+                                               t-att-value="this.state.data.settings.openrouter_model"
+                                               t-on-input="(ev) => this.updateField(this.state.data.settings, 'openrouter_model', ev)"/>
                                     </div>
                                 </div>
                             </div>
